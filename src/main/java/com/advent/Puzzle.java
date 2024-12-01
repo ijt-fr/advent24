@@ -16,11 +16,18 @@ public abstract class Puzzle {
         return FileUtils.readLines(file, "UTF-8");
     }
 
-    public abstract Object computeAnswer(List<String> input);
+    public abstract Object computePart1(List<String> input);
+
+    public abstract Object computePart2(List<String> input);
 
     @Test
-    public void test() throws IOException {
-        System.out.println(computeAnswer(readInput()));
+    public void part1() throws IOException {
+        System.out.println(computePart1(readInput()));
+    }
+
+    @Test
+    public void part2() throws IOException {
+        System.out.println(computePart2(readInput()));
     }
 
 }

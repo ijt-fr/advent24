@@ -5,18 +5,18 @@ import java.util.List;
 
 import com.advent.Puzzle;
 
-public class HistorianHysteria1 extends Puzzle {
+public class HistorianHysteria extends Puzzle {
 
     List<Integer> list1;
     List<Integer> list2;
 
-    HistorianHysteria1() {
+    HistorianHysteria() {
         list1 = new ArrayList<>();
         list2 = new ArrayList<>();
     }
 
     @Override
-    public Long computeAnswer(List<String> input) {
+    public Long computePart1(List<String> input) {
         consumeInputs(input);
         list1.sort(Integer::compareTo);
         list2.sort(Integer::compareTo);
@@ -28,6 +28,16 @@ public class HistorianHysteria1 extends Puzzle {
             totalDistance+=Math.abs(num1 - num2);
         }
         return totalDistance;
+    }
+
+    @Override
+    public Object computePart2(List<String> input) {
+        consumeInputs(input);
+        long totalSimilarity = 0L;
+        for (Integer num1 : list1) {
+            totalSimilarity+=num1 * list2.stream().filter(num1::equals).count();
+        }
+        return totalSimilarity;
     }
 
     protected void consumeInputs(List<String> input) {
