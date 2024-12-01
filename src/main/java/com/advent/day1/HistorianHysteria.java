@@ -23,9 +23,7 @@ public class HistorianHysteria extends Puzzle {
 
         long totalDistance = 0L;
         for (int i = 0; i < list1.size(); i++) {
-            Integer num1 = list1.get(i);
-            Integer num2 = list2.get(i);
-            totalDistance+=Math.abs(num1 - num2);
+            totalDistance += Math.abs(list1.get(i) - list2.get(i));
         }
         return totalDistance;
     }
@@ -35,12 +33,12 @@ public class HistorianHysteria extends Puzzle {
         consumeInputs(input);
         long totalSimilarity = 0L;
         for (Integer num1 : list1) {
-            totalSimilarity+=num1 * list2.stream().filter(num1::equals).count();
+            totalSimilarity += num1 * list2.stream().filter(num1::equals).count();
         }
         return totalSimilarity;
     }
 
-    protected void consumeInputs(List<String> input) {
+    private void consumeInputs(List<String> input) {
         input.forEach(s -> {
             var splits = s.split(" +");
             list1.add(Integer.parseInt(splits[0]));
