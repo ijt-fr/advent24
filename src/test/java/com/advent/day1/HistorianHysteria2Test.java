@@ -1,15 +1,14 @@
-package com.advent;
+package com.advent.day1;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.advent.day1.HistorianHysteria1;
+import com.advent.Puzzle;
 
-public class HistorianHysteria1Test {
+public class HistorianHysteria2Test {
 
     String sampleInput = """
             3   4
@@ -22,7 +21,7 @@ public class HistorianHysteria1Test {
 
     @Test
     public void testSample() {
-        Puzzle puzzle = new HistorianHysteria1();
-        assertThat(puzzle.computeAnswer(List.of(sampleInput.split("\n")))).isEqualTo(11L);
+        Puzzle puzzle = new HistorianHysteria2();
+        assertThat(puzzle.computeAnswer(List.of(sampleInput.split("\n")))).isEqualTo(31L);
     }
 }
