@@ -14,7 +14,7 @@ public abstract class Puzzle {
     }
 
     protected List<String> readInput(String filename) throws IOException {
-        ClassLoader classLoader = Main.class.getClassLoader();
+        ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(filename).getFile());
         return FileUtils.readLines(file, "UTF-8");
     }
