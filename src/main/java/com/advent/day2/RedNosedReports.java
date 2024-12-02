@@ -41,7 +41,7 @@ public class RedNosedReports extends Puzzle {
     }
 
     private static boolean isSafe(List<Integer> report) {
-        Integer first = report.get(0);
+        Integer first = report.getFirst();
         Integer second = report.get(1);
         boolean increasing = second > first;
         for (int i = 0; i < report.size() - 1; i++) {
