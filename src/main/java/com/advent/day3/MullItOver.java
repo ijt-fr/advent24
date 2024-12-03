@@ -18,7 +18,7 @@ public class MullItOver extends Puzzle {
 
     @Override
     public Object computePart1(List<String> input) {
-        String joinedInput = join("P", input);
+        String joinedInput = join("J", input);
         Matcher matcher = MUL_PATTERN.matcher(joinedInput);
         long total = 0L;
         while (matcher.find()) {
@@ -29,11 +29,11 @@ public class MullItOver extends Puzzle {
 
     @Override
     public Object computePart2(List<String> input) {
-        String joinedInput = join("P", input);
+        String joinedInput = join("J", input);
         String[] regions = ("do()" + joinedInput).split("don't\\(\\)");
         String doRegions = Arrays.stream(regions)
                               .map(reg -> substringAfter(reg, "do()"))
-                              .collect(joining());
+                              .collect(joining("J"));
         Matcher matcher = MUL_PATTERN.matcher(doRegions);
         long total = 0L;
         while (matcher.find()) {
