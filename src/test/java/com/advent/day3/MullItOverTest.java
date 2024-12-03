@@ -8,11 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MullItOverTest {
-    private static final String SAMPLE_INPUT =
-            """
-            xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
-            """;
-
+    private static final String SAMPLE_1 = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
     private static final String SAMPLE2 = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
 
     private static final Long EXPECTED_1 = 161L;
@@ -27,7 +23,7 @@ public class MullItOverTest {
 
     @Test
     public void testSamplePart1() {
-        assertThat(puzzle.computePart1(List.of(SAMPLE_INPUT.split("\n")))).isEqualTo(EXPECTED_1);
+        assertThat(puzzle.computePart1(List.of(SAMPLE_1.split("\n")))).isEqualTo(EXPECTED_1);
     }
 
     @Test
