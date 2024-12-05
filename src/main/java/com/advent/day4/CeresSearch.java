@@ -26,9 +26,7 @@ public class CeresSearch extends Puzzle {
                                 if (isOutOfXBounds(aX, matrix)) continue;
                                 if (matrix[aY][aX] == 'A') {
                                     int sY = i + 3 * (k - i);
-                                    if (isOutOfYBounds(sY, matrix)) {
-                                        continue;
-                                    }
+                                    if (isOutOfYBounds(sY, matrix)) continue;
                                     int sX = j + 3 * (l - j);
                                     if (isOutOfXBounds(sX, matrix)) continue;
                                     if (matrix[sY][sX] == 'S') {
