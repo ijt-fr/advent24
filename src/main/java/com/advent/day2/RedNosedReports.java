@@ -9,15 +9,17 @@ import java.util.stream.Collectors;
 import com.advent.Puzzle;
 
 public class RedNosedReports extends Puzzle {
+    private List<String> input;
+
     @Override
-    public Object computePart1(List<String> input) {
+    public Object computePart1() {
         return input.stream()
                        .map(RedNosedReports::parseReport)
                        .filter(RedNosedReports::isSafe).count();
     }
 
     @Override
-    public Object computePart2(List<String> input) {
+    public Object computePart2() {
         Map<List<Integer>, Boolean> reports = input.stream()
                 .map(RedNosedReports::parseReport)
                 .collect(Collectors.toMap(report -> report, RedNosedReports::isSafe));
@@ -38,6 +40,21 @@ public class RedNosedReports extends Puzzle {
                 }).count();
 
         return reports.values().stream().filter(safe -> safe).count() + safeUnsafeReportCount;
+    }
+
+    @Override
+    public void parseInput(List<String> lines) {
+        input = lines;
+    }
+
+    @Override
+    public Object part1Answer() {
+        return 490L;
+    }
+
+    @Override
+    public Object part2Answer() {
+        return 536L;
     }
 
     private static boolean isSafe(List<Integer> report) {

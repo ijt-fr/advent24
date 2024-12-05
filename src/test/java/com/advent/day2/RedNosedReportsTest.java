@@ -1,14 +1,12 @@
 package com.advent.day2;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.stream.Stream;
 
-import java.util.List;
+import org.junit.jupiter.params.provider.Arguments;
 
-import org.junit.jupiter.api.Test;
+import com.advent.BasePuzzleTest;
 
-import com.advent.Puzzle;
-
-public class RedNosedReportsTest {
+public class RedNosedReportsTest extends BasePuzzleTest<RedNosedReports> {
 
     private static final String SAMPLE_INPUT =
             """
@@ -22,15 +20,18 @@ public class RedNosedReportsTest {
     private static final Long EXPECTED_1 = 2L;
     private static final Long EXPECTED_2 = 4L;
 
-    @Test
-    public void testSamplePart1() {
-        Puzzle puzzle = new RedNosedReports();
-        assertThat(puzzle.computePart1(List.of(SAMPLE_INPUT.split("\n")))).isEqualTo(EXPECTED_1);
+    @Override
+    public RedNosedReports getPuzzle() {
+        return new RedNosedReports();
     }
 
-    @Test
-    public void testSamplePart2() {
-        Puzzle puzzle = new RedNosedReports();
-        assertThat(puzzle.computePart2(List.of(SAMPLE_INPUT.split("\n")))).isEqualTo(EXPECTED_2);
+    @Override
+    public Stream<Arguments> part1Samples() {
+        return Stream.of(Arguments.of(SAMPLE_INPUT, EXPECTED_1));
+    }
+
+    @Override
+    public Stream<Arguments> part2Samples() {
+        return Stream.of(Arguments.of(SAMPLE_INPUT, EXPECTED_2));
     }
 }

@@ -1,5 +1,7 @@
 package com.advent;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -16,18 +18,30 @@ public abstract class Puzzle {
         return FileUtils.readLines(file, "UTF-8");
     }
 
-    public abstract Object computePart1(List<String> input);
+    public abstract void parseInput(List<String> lines);
 
-    public abstract Object computePart2(List<String> input);
+    public abstract Object computePart1();
+
+    public abstract Object part1Answer();
+
+    public abstract Object computePart2();
+
+    public abstract Object part2Answer();
 
     @Test
     public void part1() throws IOException {
-        System.out.println(computePart1(readInput()));
+        parseInput(readInput());
+        Object answer = computePart1();
+        System.out.println(computePart1());
+        assertThat(answer).isEqualTo(part1Answer());
     }
 
     @Test
     public void part2() throws IOException {
-        System.out.println(computePart2(readInput()));
+        parseInput(readInput());
+        Object answer = computePart2();
+        System.out.println(computePart2());
+        assertThat(answer).isEqualTo(part2Answer());
     }
 
 }

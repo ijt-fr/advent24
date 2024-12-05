@@ -1,15 +1,12 @@
 package com.advent.day4;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.stream.Stream;
 
-import java.util.List;
+import org.junit.jupiter.params.provider.Arguments;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.advent.BasePuzzleTest;
 
-import com.advent.Puzzle;
-
-public class CeresSearchTest {
+public class CeresSearchTest extends BasePuzzleTest<CeresSearch> {
 
     private static final String SAMPLE =
             """
@@ -28,20 +25,18 @@ public class CeresSearchTest {
     private static final Long EXPECTED_1 = 18L;
     private static final Long EXPECTED_2 = 9L;
 
-    private Puzzle puzzle;
-
-    @BeforeEach
-    public void setUp() {
-        puzzle = new CeresSearch();
+    @Override
+    public CeresSearch getPuzzle() {
+        return new CeresSearch();
     }
 
-    @Test
-    public void testSamplePart1() {
-        assertThat(puzzle.computePart1(List.of(SAMPLE.split("\n")))).isEqualTo(EXPECTED_1);
+    @Override
+    public Stream<Arguments> part1Samples() {
+        return Stream.of(Arguments.of(SAMPLE, EXPECTED_1));
     }
 
-    @Test
-    public void testSamplePart2() {
-        assertThat(puzzle.computePart2(List.of(SAMPLE.split("\n")))).isEqualTo(EXPECTED_2);
+    @Override
+    public Stream<Arguments> part2Samples() {
+        return Stream.of(Arguments.of(SAMPLE, EXPECTED_2));
     }
 }

@@ -6,9 +6,10 @@ import com.advent.Puzzle;
 
 public class CeresSearch extends Puzzle {
 
+    private char[][] matrix;
+
     @Override
-    public Object computePart1(List<String> input) {
-        char[][] matrix = toCharMatrix(input);
+    public Object computePart1() {
         Long xmasCount = 0L;
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
@@ -58,9 +59,7 @@ public class CeresSearch extends Puzzle {
     }
 
     @Override
-    public Object computePart2(List<String> input) {
-        char[][] matrix = toCharMatrix(input);
-
+    public Object computePart2() {
         long xmasCount = 0L;
         for (int i = 1; i < matrix.length - 1; i++) {
             for (int j = 1; j < matrix[0].length - 1; j++) {
@@ -88,6 +87,21 @@ public class CeresSearch extends Puzzle {
             }
         }
         return xmasCount;
+    }
+
+    @Override
+    public void parseInput(List<String> lines) {
+        matrix = toCharMatrix(lines);
+    }
+
+    @Override
+    public Object part1Answer() {
+        return 2397L;
+    }
+
+    @Override
+    public Object part2Answer() {
+        return 1824L;
     }
 
 }

@@ -15,10 +15,10 @@ import com.advent.Puzzle;
 public class MullItOver extends Puzzle {
 
     private static final Pattern MUL_PATTERN = Pattern.compile("mul\\((\\d{1,3}),(\\d{1,3})\\)");
+    private String joinedInput;
 
     @Override
-    public Object computePart1(List<String> input) {
-        String joinedInput = join("J", input);
+    public Object computePart1() {
         Matcher matcher = MUL_PATTERN.matcher(joinedInput);
         long total = 0L;
         while (matcher.find()) {
@@ -28,8 +28,7 @@ public class MullItOver extends Puzzle {
     }
 
     @Override
-    public Object computePart2(List<String> input) {
-        String joinedInput = join("J", input);
+    public Object computePart2() {
         String[] regions = ("do()" + joinedInput).split("don't\\(\\)");
         String doRegions = Arrays.stream(regions)
                               .map(reg -> substringAfter(reg, "do()"))
@@ -40,6 +39,21 @@ public class MullItOver extends Puzzle {
             total += matchGroup(matcher);
         }
         return total;
+    }
+
+    @Override
+    public void parseInput(List<String> lines) {
+        joinedInput = join("J", lines);
+    }
+
+    @Override
+    public Object part1Answer() {
+        return 184576302L;
+    }
+
+    @Override
+    public Object part2Answer() {
+        return 118173507L;
     }
 
     private static long matchGroup(Matcher matcher) {

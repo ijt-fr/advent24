@@ -2,7 +2,6 @@ package com.advent.day5;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,14 +14,18 @@ import com.advent.Puzzle;
 
 public class PrintQueue extends Puzzle {
 
-    Map<Integer, Set<Integer>> pageOrderingRules;
+    private Map<Integer, Set<Integer>> pageOrderingRules;
+    private List<List<Integer>> updates;
 
     @Override
-    public Object computePart1(List<String> input) {
+    public void parseInput(List<String> input) {
         var it = input.iterator();
         pageOrderingRules = parsePageOrderingRules(it);
-        List<List<Integer>> updates = parseUpdates(it);
+        updates = parseUpdates(it);
+    }
 
+    @Override
+    public Object computePart1() {
         long middlePages = 0L;
         for (List<Integer> update : updates) {
             if (isValid(update)) {
@@ -33,42 +36,40 @@ public class PrintQueue extends Puzzle {
     }
 
     @Override
-    public Object computePart2(List<String> input) {
-        var it = input.iterator();
-        pageOrderingRules = parsePageOrderingRules(it);
-        List<List<Integer>> updates = parseUpdates(it);
+    public Object part1Answer() {
+        return 6612L;
+    }
 
-
-
+    @Override
+    public Object computePart2() {
         long middleValues = 0L;
         for (List<Integer> update : updates) {
             if (!isValid(update)) {
-                while (!isValid(update)) {
-                    Collections.shuffle(update);
+                for (Integer page : update) {
+                    int mustGoAfterCount = (int) pageOrderingRules.entrySet().stream()
+                                                         .filter(e -> update.contains(e.getKey()))
+                                                         .filter(e -> e.getValue().contains(page))
+                                                         .count();
+                    if (isMiddle(update, mustGoAfterCount)) {
+                        middleValues += page;
+                        break;
+                    }
                 }
-                middleValues += getMiddleValue(update);
             }
-//            for (var before : pageOrderingRules.keySet()) {
-//                int beforeIndex = update.indexOf(before);
-//                if (beforeIndex == -1) {
-//                    continue;
-//                }
-//                Optional<Integer> firstIndex = pageOrderingRules.get(before).stream().map(update::indexOf)
-//                        .filter(index -> index != -1).reduce(Math::min);
-//                firstIndex.ifPresent(integer -> {
-//                    update.remove(beforeIndex);
-//                    update.add(integer, before);
-//                });
-//            }
-//            middleValues += update.get((update.size() - 1) / 2);
         }
-
-
         return middleValues;
     }
 
+    @Override
+    public Object part2Answer() {
+        return 4944L;
+    }
+
+    private boolean isMiddle(List<Integer> update, int mustGoAfterCount) {
+        return mustGoAfterCount == (update.size() - 1) / 2;
+    }
+
     private boolean isValid(List<Integer> update) {
-        boolean isInCorrectOrder = true;
         for (var before : pageOrderingRules.keySet()) {
             int beforeIndex = update.indexOf(before);
             if (beforeIndex == -1) {
@@ -77,11 +78,15 @@ public class PrintQueue extends Puzzle {
             for (Integer after : pageOrderingRules.get(before)) {
                 int afterIndex = update.indexOf(after);
                 if (afterIndex != -1 && beforeIndex > afterIndex) {
-                    isInCorrectOrder = false;
+                    return false;
                 }
             }
         }
-        return isInCorrectOrder;
+        return true;
+    }
+
+    private long getMiddleValue(List<Integer> update) {
+        return update.get((update.size() - 1) / 2);
     }
 
     private static List<List<Integer>> parseUpdates(Iterator<String> it) {
@@ -110,9 +115,5 @@ public class PrintQueue extends Puzzle {
             });
         }
         return pageOrderingRules;
-    }
-
-    private long getMiddleValue(List<Integer> update) {
-        return update.get((update.size() - 1) / 2);
     }
 }

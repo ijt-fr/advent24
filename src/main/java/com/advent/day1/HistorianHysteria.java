@@ -10,14 +10,8 @@ public class HistorianHysteria extends Puzzle {
     List<Integer> list1;
     List<Integer> list2;
 
-    HistorianHysteria() {
-        list1 = new ArrayList<>();
-        list2 = new ArrayList<>();
-    }
-
     @Override
-    public Long computePart1(List<String> input) {
-        consumeInputs(input);
+    public Long computePart1() {
         list1.sort(Integer::compareTo);
         list2.sort(Integer::compareTo);
 
@@ -29,8 +23,7 @@ public class HistorianHysteria extends Puzzle {
     }
 
     @Override
-    public Object computePart2(List<String> input) {
-        consumeInputs(input);
+    public Object computePart2() {
         long totalSimilarity = 0L;
         for (Integer num1 : list1) {
             totalSimilarity += num1 * list2.stream().filter(num1::equals).count();
@@ -38,11 +31,24 @@ public class HistorianHysteria extends Puzzle {
         return totalSimilarity;
     }
 
-    private void consumeInputs(List<String> input) {
+    @Override
+    public void parseInput(List<String> input) {
+        list1 = new ArrayList<>();
+        list2 = new ArrayList<>();
         input.forEach(s -> {
             var splits = s.split(" +");
             list1.add(Integer.parseInt(splits[0]));
             list2.add(Integer.parseInt(splits[1]));
         });
+    }
+
+    @Override
+    public Object part1Answer() {
+        return 2742123L;
+    }
+
+    @Override
+    public Object part2Answer() {
+        return 21328497L;
     }
 }

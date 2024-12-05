@@ -1,16 +1,14 @@
 package com.advent.day1;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.stream.Stream;
 
-import java.util.List;
+import org.junit.jupiter.params.provider.Arguments;
 
-import org.junit.jupiter.api.Test;
+import com.advent.BasePuzzleTest;
 
-import com.advent.Puzzle;
+public class HistorianHysteriaTest extends BasePuzzleTest<HistorianHysteria> {
 
-public class HistorianHysteriaTest {
-
-    String sampleInput = """
+    private static final String SAMPLE_INPUT = """
             3   4
             4   3
             2   5
@@ -19,15 +17,22 @@ public class HistorianHysteriaTest {
             3   3
             """;
 
-    @Test
-    public void testSamplePart1() {
-        Puzzle puzzle = new HistorianHysteria();
-        assertThat(puzzle.computePart1(List.of(sampleInput.split("\n")))).isEqualTo(11L);
+    @Override
+    public HistorianHysteria getPuzzle() {
+        return new HistorianHysteria();
     }
 
-    @Test
-    public void testSamplePart2() {
-        Puzzle puzzle = new HistorianHysteria();
-        assertThat(puzzle.computePart2(List.of(sampleInput.split("\n")))).isEqualTo(31L);
+    @Override
+    public Stream<Arguments> part1Samples() {
+        return Stream.of(
+                Arguments.of(SAMPLE_INPUT, 11L)
+        );
+    }
+
+    @Override
+    public Stream<Arguments> part2Samples() {
+        return Stream.of(
+                Arguments.of(SAMPLE_INPUT, 31L)
+        );
     }
 }

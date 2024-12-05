@@ -1,15 +1,12 @@
 package com.advent.day5;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.stream.Stream;
 
-import java.util.List;
+import org.junit.jupiter.params.provider.Arguments;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.advent.BasePuzzleTest;
 
-import com.advent.Puzzle;
-
-public class PrintQueueTest {
+public class PrintQueueTest extends BasePuzzleTest<PrintQueue> {
 
     private static final String INPUT = """
             47|53
@@ -45,20 +42,18 @@ public class PrintQueueTest {
     private static final Long EXPECTED_1 = 143L;
     private static final Long EXPECTED_2 = 123L;
 
-    private Puzzle puzzle;
-
-    @BeforeEach
-    public void setUp() {
-        puzzle = new PrintQueue();
+    @Override
+    public PrintQueue getPuzzle() {
+        return new PrintQueue();
     }
 
-    @Test
-    public void testSamplePart1() {
-        assertThat(puzzle.computePart1(List.of(INPUT.split("\n")))).isEqualTo(EXPECTED_1);
+    @Override
+    public Stream<Arguments> part1Samples() {
+        return Stream.of(Arguments.of(INPUT, EXPECTED_1));
     }
 
-    @Test
-    public void testSamplePart2() {
-        assertThat(puzzle.computePart2(List.of(INPUT.split("\n")))).isEqualTo(EXPECTED_2);
+    @Override
+    public Stream<Arguments> part2Samples() {
+        return Stream.of(Arguments.of(INPUT, EXPECTED_2));
     }
 }
