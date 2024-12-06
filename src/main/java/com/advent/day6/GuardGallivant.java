@@ -41,6 +41,10 @@ public class GuardGallivant extends Puzzle {
 
     @Override
     public Object computePart1() {
+        return visitAll().size();
+    }
+
+    private Set<Vector2> visitAll() {
         Set<Vector2> visited = new HashSet<>();
         visited.add(currentPosition);
         while (true) {
@@ -55,7 +59,7 @@ public class GuardGallivant extends Puzzle {
                 currentPosition = newPosition;
             }
         }
-        return visited.size();
+        return visited;
     }
 
     private boolean collision(Vector2 newPosition) {
@@ -76,19 +80,14 @@ public class GuardGallivant extends Puzzle {
         Vector2 startPosition = currentPosition;
         var startFacing = facing;
         long loopObs = 0L;
-
-        for (int i = 0; i < maxX; i++) {
-            for (int j = 0; j < maxY; j++) {
-                var newObstacle = new Vector2(i, j);
-                if (startPosition.equals(newObstacle) || obstacles.contains(newObstacle)) {
-                    continue;
-                }
-                if (isLoop(newObstacle, startPosition, startFacing)) {
-                    loopObs++;
-                }
+        for (Vector2 vector2 : visitAll()) {
+            if (startPosition.equals(vector2)) {
+                continue;
+            }
+            if (isLoop(vector2, startPosition, startFacing)) {
+                loopObs++;
             }
         }
-
         return loopObs;
     }
 
