@@ -3,6 +3,7 @@ package com.advent.day4;
 import java.util.List;
 
 import com.advent.Puzzle;
+import com.advent.util.InputUtils;
 
 public class CeresSearch extends Puzzle {
 
@@ -54,10 +55,6 @@ public class CeresSearch extends Puzzle {
         return y < 0 || y >= matrix.length;
     }
 
-    private char[][] toCharMatrix(List<String> lines) {
-        return lines.stream().map(String::toCharArray).toArray(char[][]::new);
-    }
-
     @Override
     public Object computePart2() {
         long xmasCount = 0L;
@@ -91,7 +88,7 @@ public class CeresSearch extends Puzzle {
 
     @Override
     public void parseInput(List<String> lines) {
-        matrix = toCharMatrix(lines);
+        matrix = InputUtils.toCharMatrix(lines);
     }
 
     @Override
