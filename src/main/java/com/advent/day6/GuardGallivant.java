@@ -1,6 +1,5 @@
 package com.advent.day6;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +12,7 @@ import com.advent.util.Vector2;
 
 public class GuardGallivant extends Puzzle {
 
-    private List<Vector2> obstacles;
+    private Set<Vector2> obstacles;
     private Vector2 currentPosition;
     private Direction facing;
     private int maxX;
@@ -24,7 +23,7 @@ public class GuardGallivant extends Puzzle {
         char[][] matrix = InputUtils.toCharMatrix(lines);
         maxX = matrix[0].length;
         maxY = matrix.length;
-        obstacles = new ArrayList<>();
+        obstacles = new HashSet<>();
 
         for (int i = 0; i < maxX; i++) {
             for (int j = 0; j < maxY; j++) {
