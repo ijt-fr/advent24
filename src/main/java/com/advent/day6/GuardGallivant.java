@@ -79,11 +79,11 @@ public class GuardGallivant extends Puzzle {
         Vector2 startPosition = currentPosition;
         var startFacing = facing;
         long loopObs = 0L;
-        for (Vector2 vector2 : visitAll()) {
-            if (startPosition.equals(vector2)) {
+        for (Vector2 visitedPosition : visitAll()) {
+            if (startPosition.equals(visitedPosition)) {
                 continue;
             }
-            if (isLoop(vector2, startPosition, startFacing)) {
+            if (isLoop(visitedPosition, startPosition, startFacing)) {
                 loopObs++;
             }
         }
