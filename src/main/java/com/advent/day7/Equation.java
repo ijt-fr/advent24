@@ -4,24 +4,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-record Equation(long result, List<Long> numbers) {
+record Equation(long solution, List<Long> numbers) {
 
     // will return 0 if not solvable
     long solve(Set<Operation> operations) {
         return operations.stream()
                        .map(op -> recur(0L, numbers, op, operations))
-                       .filter(solution -> solution.equals(result))
+                       .filter(s -> s.equals(solution))
                        .findAny().orElse(0L);
     }
 
-    private long recur(long total, List<Long> remaining, Operation currentOp, Set<Operation> operations) {
-        if (remaining.isEmpty()) {
-            return total;
+    private long recur(long currentTotal, List<Long> remaining, Operation currentOp, Set<Operation> operations) {
+        if (currentTotal > solution || remaining.isEmpty()) {
+            return currentTotal;
         }
-        var newTotal = currentOp.apply(total, remaining.getFirst());
+        var newTotal = currentOp.apply(currentTotal, remaining.getFirst());
         return operations.stream()
                        .map(op -> recur(newTotal, remaining.subList(1, remaining.size()), op, operations))
-                       .filter(solution -> solution.equals(result))
+                       .filter(s -> s.equals(solution))
                        .findAny().orElse(0L);
     }
 
@@ -29,7 +29,7 @@ record Equation(long result, List<Long> numbers) {
 
         ADD(Long::sum),
         MULT((a, b) -> a * b),
-        CONCAT((a, b) -> Long.parseLong(a + String.valueOf(b)));
+        CONCAT((a, b) -> Long.parseLong(String.format("%d%d", a, b)));
 
         private final BiFunction<Long, Long, Long> operation;
 
