@@ -32,6 +32,6 @@ public class BridgeRepairTest extends BasePuzzleTest<BridgeRepair> {
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.of();
+        return Stream.of(Arguments.of(SAMPLE, 11387L));
     }
 }
