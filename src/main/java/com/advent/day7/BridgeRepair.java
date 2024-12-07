@@ -1,5 +1,9 @@
 package com.advent.day7;
 
+import static com.advent.day7.Equation.Operation.ADD;
+import static com.advent.day7.Equation.Operation.CONCAT;
+import static com.advent.day7.Equation.Operation.MULT;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +30,10 @@ public class BridgeRepair extends Puzzle {
 
     @Override
     public Object computePart1() {
-        return equations.stream().map(e -> e.solve(false)).reduce(Long::sum).orElseThrow();
+        return equations.stream()
+                       .map(e -> e.solve(Set.of(ADD, MULT)))
+                       .reduce(Long::sum)
+                       .orElseThrow();
     }
 
     @Override
@@ -36,7 +43,10 @@ public class BridgeRepair extends Puzzle {
 
     @Override
     public Object computePart2() {
-        return equations.stream().map(e -> e.solve(true)).reduce(Long::sum).orElseThrow();
+        return equations.stream()
+                       .map(e -> e.solve(Set.of(ADD, MULT, CONCAT)))
+                       .reduce(Long::sum)
+                       .orElseThrow();
     }
 
     @Override

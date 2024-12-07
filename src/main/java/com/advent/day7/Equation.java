@@ -1,61 +1,44 @@
 package com.advent.day7;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiFunction;
 
 record Equation(long result, List<Long> numbers) {
 
     // will return 0 if not solvable
-    long solve(boolean shouldConcat) {
-        long solution = add(0L, numbers.getFirst(), numbers.subList(1, numbers.size()), shouldConcat);
-        if (solution == result) {
-            return result;
-        }
-        solution = mult(0L, numbers.getFirst(), numbers.subList(1, numbers.size()), shouldConcat);
-        if (solution == result) {
-            return result;
-        }
-        if (shouldConcat) {
-            solution = concat(0L, numbers.getFirst(), numbers.subList(1, numbers.size()));
-            if (solution == result) {
-                return result;
-            }
-        }
-        return 0L;
+    long solve(Set<Operation> operations) {
+        return operations.stream()
+                       .map(op -> recur(0L, numbers, op, operations))
+                       .filter(solution -> solution.equals(result))
+                       .findAny().orElse(0L);
     }
 
-    private long mult(long total, Long next, List<Long> remaining, boolean shouldConcat) {
-        total = total * next;
-        return recur(total, remaining, shouldConcat);
-    }
-
-    private long add(long total, Long next, List<Long> remaining, boolean shouldConcat) {
-        total = total + next;
-        return recur(total, remaining, shouldConcat);
-    }
-
-    private long concat(long total, Long next, List<Long> remaining) {
-        total = Long.parseLong(total + String.valueOf(next));
-        return recur(total, remaining, true);
-    }
-
-    private long recur(long total, List<Long> remaining, boolean shouldConcat) {
+    private long recur(long total, List<Long> remaining, Operation currentOp, Set<Operation> operations) {
         if (remaining.isEmpty()) {
             return total;
         }
-        long solution = add(total, remaining.getFirst(), remaining.subList(1, remaining.size()), shouldConcat);
-        if (solution == result) {
-            return solution;
+        var newTotal = currentOp.apply(total, remaining.getFirst());
+        return operations.stream()
+                       .map(op -> recur(newTotal, remaining.subList(1, remaining.size()), op, operations))
+                       .filter(solution -> solution.equals(result))
+                       .findAny().orElse(0L);
+    }
+
+    enum Operation {
+
+        ADD(Long::sum),
+        MULT((a, b) -> a * b),
+        CONCAT((a, b) -> Long.parseLong(a + String.valueOf(b)));
+
+        private final BiFunction<Long, Long, Long> operation;
+
+        Operation(BiFunction<Long, Long, Long> operation) {
+            this.operation = operation;
         }
-        solution = mult(total, remaining.getFirst(), remaining.subList(1, remaining.size()), shouldConcat);
-        if (solution == result) {
-            return result;
+
+        private long apply(long a, long b) {
+            return operation.apply(a, b);
         }
-        if (shouldConcat) {
-            solution = concat(total, remaining.getFirst(), remaining.subList(1, remaining.size()));
-            if (solution == result) {
-                return result;
-            }
-        }
-        return 0;
     }
 }
