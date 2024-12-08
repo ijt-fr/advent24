@@ -39,19 +39,23 @@ public class ResonantCollinearity extends Puzzle {
                 for (int j = i + 1; j < a.size(); j++) {
                     var antena1 = ((List<Vector2>) a).get(i);
                     var antena2 = ((List<Vector2>) a).get(j);
-                    var diff = antena1.minus(antena2);
-                    var antinode1 = antena1.add(diff);
-                    if (inBounds(antinode1)) {
-                        antinodes.add(antinode1);
-                    }
-                    var antinode2 = antena2.minus(diff);
-                    if (inBounds(antinode2)) {
-                        antinodes.add(antinode2);
-                    }
+                    getPart1Antinodes(antinodes, antena1, antena2);
                 }
             }
         });
         return antinodes.size();
+    }
+
+    private void getPart1Antinodes(Set<Vector2> antinodes, Vector2 antena1, Vector2 antena2) {
+        var diff = antena1.minus(antena2);
+        var antinode1 = antena1.add(diff);
+        if (inBounds(antinode1)) {
+            antinodes.add(antinode1);
+        }
+        var antinode2 = antena2.minus(diff);
+        if (inBounds(antinode2)) {
+            antinodes.add(antinode2);
+        }
     }
 
     private boolean inBounds(Vector2 antinode) {
@@ -65,11 +69,37 @@ public class ResonantCollinearity extends Puzzle {
 
     @Override
     public Object computePart2() {
-        return null;
+        Set<Vector2> antinodes = new HashSet<>();
+        antenas.asMap().values().forEach(a -> {
+            for (int i = 0; i < a.size(); i++) {
+                for (int j = i + 1; j < a.size(); j++) {
+                    var antena1 = ((List<Vector2>) a).get(i);
+                    var antena2 = ((List<Vector2>) a).get(j);
+                    getPart2Antinodes(antinodes, antena1, antena2);
+                }
+            }
+        });
+        return antinodes.size();
+    }
+
+    private void getPart2Antinodes(Set<Vector2> antinodes, Vector2 antena1, Vector2 antena2) {
+        antinodes.add(antena1);
+        antinodes.add(antena2);
+        var diff = antena1.minus(antena2);
+        var antinode1 = antena1.add(diff);
+        while (inBounds(antinode1)) {
+            antinodes.add(antinode1);
+            antinode1 = antinode1.add(diff);
+        }
+        var antinode2 = antena2.minus(diff);
+        while (inBounds(antinode2)) {
+            antinodes.add(antinode2);
+            antinode2 = antinode2.minus(diff);
+        }
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return 1259;
     }
 }

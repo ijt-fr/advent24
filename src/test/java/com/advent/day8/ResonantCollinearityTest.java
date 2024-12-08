@@ -34,6 +34,6 @@ public class ResonantCollinearityTest extends BasePuzzleTest<ResonantCollinearit
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.empty();
+        return Stream.of(Arguments.of(EXAMPLE_1, 34));
     }
 }
