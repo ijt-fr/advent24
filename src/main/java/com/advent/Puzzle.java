@@ -32,7 +32,7 @@ public abstract class Puzzle {
     public void part1() throws IOException {
         parseInput(readInput());
         Object answer = computePart1();
-        System.out.println(computePart1());
+        System.out.println(answer);
         assertThat(answer).isEqualTo(part1Answer());
     }
 
@@ -40,7 +40,7 @@ public abstract class Puzzle {
     public void part2() throws IOException {
         parseInput(readInput());
         Object answer = computePart2();
-        System.out.println(computePart2());
+        System.out.println(answer);
         assertThat(answer).isEqualTo(part2Answer());
     }
 
