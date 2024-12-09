@@ -27,6 +27,6 @@ public class DiskFragmenterTest extends BasePuzzleTest<DiskFragmenter> {
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.empty();
+        return Stream.of(Arguments.of(EXAMPLE_2, 2858L));
     }
 }
