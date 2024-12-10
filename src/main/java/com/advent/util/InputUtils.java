@@ -1,11 +1,19 @@
 package com.advent.util;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class InputUtils {
 
     public static char[][] toCharMatrix(List<String> lines) {
         return lines.stream().map(String::toCharArray).toArray(char[][]::new);
+    }
+
+    public static Integer[][] toIntMatrix(List<String> lines) {
+        return lines.stream()
+                       .map(str -> Arrays.stream(str.split("")).map(Integer::valueOf)
+                                           .toArray(Integer[]::new))
+                       .toArray(Integer[][]::new);
     }
 
     public static String toString(char[][] matrix) {
