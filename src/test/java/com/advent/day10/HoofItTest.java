@@ -39,6 +39,6 @@ public class HoofItTest extends BasePuzzleTest<HoofIt> {
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.of();
+        return Stream.of(Arguments.of(EXAMPLE_5, 81));
     }
 }
