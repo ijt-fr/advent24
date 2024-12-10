@@ -1,10 +1,5 @@
 package com.advent.day10;
 
-import static com.advent.day6.Direction.EAST;
-import static com.advent.day6.Direction.NORTH;
-import static com.advent.day6.Direction.SOUTH;
-import static com.advent.day6.Direction.WEST;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
