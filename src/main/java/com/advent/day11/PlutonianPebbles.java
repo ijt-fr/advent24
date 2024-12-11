@@ -79,7 +79,7 @@ public class PlutonianPebbles extends Puzzle {
     }
 
     private int digits(long number) {
-        return (int) (Math.log10(Math.abs(number)) + 1);
+        return (int) (Math.log10(number) + 1);
     }
 
     private long upper(long number, long multiple) {
