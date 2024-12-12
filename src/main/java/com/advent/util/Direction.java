@@ -1,6 +1,4 @@
-package com.advent.day6;
-
-import com.advent.util.Vector2;
+package com.advent.util;
 
 public enum Direction {
     NORTH(new Vector2(0, -1)),

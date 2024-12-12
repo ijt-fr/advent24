@@ -3,10 +3,15 @@ package com.advent.util;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public class InputUtils {
 
-    public static char[][] toCharMatrix(List<String> lines) {
-        return lines.stream().map(String::toCharArray).toArray(char[][]::new);
+    public static Character[][] toCharMatrix(List<String> lines) {
+        return lines.stream()
+                       .map(String::toCharArray)
+                       .map(ArrayUtils::toObject)
+                       .toArray(Character[][]::new);
     }
 
     public static Integer[][] toIntMatrix(List<String> lines) {

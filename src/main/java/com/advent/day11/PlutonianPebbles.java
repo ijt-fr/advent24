@@ -24,7 +24,7 @@ public class PlutonianPebbles extends Puzzle {
 
     @Override
     public Object computePart1() {
-        return stones.map(l -> blink(l, 25)).reduce(Long::sum).orElse(0L);
+            return stones.map(l -> blink(l, 25)).reduce(Long::sum).orElse(0L);
     }
 
     @Override

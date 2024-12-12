@@ -7,7 +7,7 @@ import com.advent.util.InputUtils;
 
 public class CeresSearch extends Puzzle {
 
-    private char[][] matrix;
+    private Character[][] matrix;
 
     @Override
     public Object computePart1() {
@@ -44,14 +44,14 @@ public class CeresSearch extends Puzzle {
         return xmasCount;
     }
 
-    private static boolean isOutOfXBounds(int x, char[][] matrix) {
+    private static boolean isOutOfXBounds(int x, Character[][] matrix) {
         if (x < 0 || x >= matrix[0].length) {
             return true;
         }
         return false;
     }
 
-    private static boolean isOutOfYBounds(int y, char[][] matrix) {
+    private static boolean isOutOfYBounds(int y, Character[][] matrix) {
         return y < 0 || y >= matrix.length;
     }
 

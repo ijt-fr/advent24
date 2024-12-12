@@ -14,7 +14,7 @@ public class ResonantCollinearity extends Puzzle {
     private ListMultimap<Character, Vector2> antenas;
     private int xboundary;
     private int yboundary;
-    private char[][] matrix;
+    private Character[][] matrix;
 
     @Override
     public void parseInput(List<String> lines) {

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.advent.Puzzle;
+import com.advent.util.Direction;
 import com.advent.util.InputUtils;
 import com.advent.util.Vector2;
 
@@ -20,7 +21,7 @@ public class GuardGallivant extends Puzzle {
 
     @Override
     public void parseInput(List<String> lines) {
-        char[][] matrix = InputUtils.toCharMatrix(lines);
+        Character[][] matrix = InputUtils.toCharMatrix(lines);
         maxX = matrix[0].length;
         maxY = matrix.length;
         obstacles = new HashSet<>();

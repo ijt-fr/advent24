@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.advent.Puzzle;
-import com.advent.day6.Direction;
+import com.advent.util.Direction;
 import com.advent.util.Grid;
 import com.advent.util.InputUtils;
 import com.advent.util.Vector2;
