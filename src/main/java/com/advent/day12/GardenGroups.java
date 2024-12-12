@@ -3,7 +3,6 @@ package com.advent.day12;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +15,7 @@ import com.advent.util.MultiHashmap;
 import com.advent.util.Vector2;
 
 public class GardenGroups extends Puzzle {
+
     private MultiHashmap<Character, Vector2> charMap;
 
     @Override
@@ -33,18 +33,16 @@ public class GardenGroups extends Puzzle {
 
     @Override
     public Object computePart1() {
-        return charMap.entrySet().stream()
-                       .flatMap(this::regions)
+        return charMap.values().stream()
+                       .flatMap(GardenGroups::findRegions)
                        .map(r -> r.area() * r.perimeter())
                        .reduce(Long::sum).orElse(0L);
     }
 
-    private Stream<Region> regions(Map.Entry<Character, Set<Vector2>> entry) {
+    private static Stream<Region> findRegions(Set<Vector2> value) {
         Set<Region> regions = new HashSet<>();
-        var key = entry.getKey();
-        var value = entry.getValue();
         while (!value.isEmpty()) {
-            Vector2 vector = entry.getValue().stream().findFirst().orElseThrow();
+            Vector2 vector = value.stream().findFirst().orElseThrow();
             value.remove(vector);
             Set<Vector2> regionSet = new HashSet<>();
             Set<Vector2> adjacent = Set.of(vector);
@@ -55,12 +53,18 @@ public class GardenGroups extends Puzzle {
                                    .collect(Collectors.toSet());
 
             }
-            regions.add(new Region(key, regionSet));
+            Set<Plot> plots = new HashSet<>();
+            regionSet.forEach(v -> {
+                plots.add(new Plot(v, Arrays.stream(Direction.values())
+                                            .filter(d -> !regionSet.contains(v.add(d.vector())))
+                                            .collect(Collectors.toSet())));
+            });
+            regions.add(new Region(plots));
         }
         return regions.stream();
     }
 
-    private Stream<Vector2> findAdjacent(Vector2 vector, Set<Vector2> set) {
+    private static Stream<Vector2> findAdjacent(Vector2 vector, Set<Vector2> set) {
         return Arrays.stream(Direction.values())
                        .map(d -> vector.add(d.vector()))
                        .filter(set::contains)
@@ -74,34 +78,44 @@ public class GardenGroups extends Puzzle {
 
     @Override
     public Object computePart2() {
-        return charMap.entrySet().stream()
-                       .flatMap(this::regions)
+        return charMap.values().stream()
+                       .flatMap(GardenGroups::findRegions)
                        .map(r -> r.area() * r.sides())
                        .reduce(Long::sum).orElse(0L);
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return 911750L;
     }
 
-    record Region(Character type, Set<Vector2> vectors) {
+    record Region(Set<Plot> plots) {
 
         long perimeter() {
-            return vectors.stream()
-                           .map(vector -> Arrays.stream(Direction.values())
-                                                  .map(d -> vector.add(d.vector()))
-                                                  .filter(vectors::contains).count())
-                           .map(l -> 4 - l)
+            return plots.stream().map(Plot::edges)
+                           .map(Set::size)
+                           .map(i -> (long) i)
                            .reduce(Long::sum).orElse(0L);
         }
 
         long sides() {
-            return 0L;
+            MultiHashmap<Direction, Vector2> inverse = new MultiHashmap<>();
+            plots.forEach(plot -> {
+                plot.edges().forEach(edge -> {
+                    inverse.add(edge, plot.vector());
+                });
+            });
+            return inverse.values().stream()
+                    .flatMap(GardenGroups::findRegions)
+                    .count();
         }
 
         long area() {
-            return vectors.size();
+            return plots.size();
         }
+    }
+
+    record Plot(Vector2 vector, Set<Direction> edges) {
+
     }
 }
