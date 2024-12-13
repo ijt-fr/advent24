@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.advent.Puzzle;
-import com.advent.util.Vector2;
+import com.advent.util.BigVector2;
 
 public class ClawContraption extends Puzzle {
 
@@ -24,19 +24,20 @@ public class ClawContraption extends Puzzle {
             var aVector = getVector(it.next().strip(), A_PATTERN);
             var bVector = getVector(it.next().strip(), B_PATTERN);
             var prizeVector = getVector(it.next().strip(), PRIZE_PATTERN);
-            machines.add(new ClawMachine(aVector, bVector, prizeVector));
+            machines.add(new ClawMachine(new Equation(aVector.x(), bVector.x(), prizeVector.x()),
+                    new Equation(aVector.y(), bVector.y(), prizeVector.y())));
             if (it.hasNext()) {
                 it.next();
             }
         }
     }
 
-    private static Vector2 getVector(String line, Pattern pattern) {
+    private static BigVector2 getVector(String line, Pattern pattern) {
         var aMatcher = pattern.matcher(line);
         if (aMatcher.matches()) {
-            var ax = Integer.parseInt(aMatcher.group(1));
-            var ay = Integer.parseInt(aMatcher.group(2));
-            return new Vector2(ax, ay);
+            var ax = Long.parseLong(aMatcher.group(1));
+            var ay = Long.parseLong(aMatcher.group(2));
+            return new BigVector2(ax, ay);
         } else {
             throw new IllegalStateException("Match expected");
         }
@@ -49,60 +50,69 @@ public class ClawContraption extends Puzzle {
 
     @Override
     public Object part1Answer() {
-        return null;
+        return 40369L;
     }
 
     @Override
     public Object computePart2() {
-        return null;
+        return machines.stream()
+                       .map(machine -> new ClawMachine(new Equation(machine.equation1.a, machine.equation1.b, machine.equation1.ans + 10000000000000L),
+                               new Equation(machine.equation2.a, machine.equation2.b, machine.equation2.ans + 10000000000000L)))
+                       .map(ClawMachine::findMinTokens).reduce(Long::sum).orElse(0L);
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return 72587986598368L;
     }
 
-    static final class ClawMachine {
-        private final Vector2 a;
-        private final Vector2 b;
-        private final Vector2 prize;
+    record Equation(long a, long b, long ans) {
 
-        ClawMachine(Vector2 a, Vector2 b, Vector2 prize) {
-            this.a = a;
-            this.b = b;
-            this.prize = prize;
+        Equation mult(long factor) {
+            return new Equation(a * factor, b * factor, ans * factor);
         }
+
+        Equation minus(Equation other) {
+            return  new Equation(a - other.a, b - other.b, ans - other.ans);
+        }
+
+        public long getA(long bans) {
+            return (ans - b * bans) / a();
+        }
+
+        public boolean isValid(long aans, long bans) {
+            return ans == (a * aans) + (b * bans);
+        }
+    }
+
+    record ClawMachine(Equation equation1, Equation equation2) {
 
         long findMinTokens() {
-            return pressB(0, 0, prize);
+            var lcm = lcm(equation1.a(), equation2.a());
+            var factor1 = (lcm / equation1.a());
+            Equation new1 = equation1.mult(factor1);
+            var factor2 = (lcm / equation2.a());
+            Equation new2 = equation2.mult(factor2);
+
+            Equation fin = new1.minus(new2);
+            long b = fin.ans() / fin.b();
+
+            long a = equation1.getA(b);
+
+            if (equation1.isValid(a, b) && equation2.isValid(a, b)) {
+                return b + a * 3;
+            }
+            return 0;
         }
 
-        private int pressB(int tokens, int presses, Vector2 current) {
-            tokens += 1;
-            presses++;
-            current = current.minus(b);
-
-            if (current.x() == 0 && current.y() == 0) {
-                // only b presses needed
-                return tokens;
+        public static long lcm(long number1, long number2) {
+            long absHigherNumber = Math.max(number1, number2);
+            long absLowerNumber = Math.min(number1, number2);
+            long lcm = absHigherNumber;
+            while (lcm % absLowerNumber != 0) {
+                lcm += absHigherNumber;
             }
-            if (current.x() < 0 || current.y() < 0) {
-                // failed to find the prize
-                return 0;
-            }
-            if (presses >= 100) {
-                // fail - too many presses
-                return 0;
-            }
-            // check if remainder is divisible by A
-            if (current.x() % a.x() == 0 && current.y() % a.y() == 0) {
-                int xDivisor = current.x() / a.x();
-                if (xDivisor == current.y() / a.y()) {
-                    return tokens + (3 * xDivisor);
-                }
-            }
-
-            return pressB(tokens, presses, current);
+            return lcm;
         }
 
     }
