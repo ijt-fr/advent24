@@ -8,7 +8,6 @@ import com.advent.BasePuzzleTest;
 
 public class ClawContraptionTest extends BasePuzzleTest<ClawContraption> {
 
-
     private static final String EXAMPLE =
             """
             Button A: X+94, Y+34
@@ -40,6 +39,6 @@ public class ClawContraptionTest extends BasePuzzleTest<ClawContraption> {
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.of(Arguments.of(EXAMPLE, 0L));
+        return Stream.of(Arguments.of(EXAMPLE, 875318608908L));
     }
 }
