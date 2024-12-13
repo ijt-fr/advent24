@@ -24,9 +24,7 @@ public class GardenGroups extends Puzzle {
         charMap = new MultiHashmap<>();
         for (int x = 0; x < grid.maxX(); x++) {
             for (int y = 0; y < grid.maxY(); y++) {
-                Character ch = grid.get(x, y);
-                Vector2 vector = new Vector2(x, y);
-                charMap.add(ch, vector);
+                charMap.add(grid.get(x, y), new Vector2(x, y));
             }
         }
     }
@@ -39,24 +37,24 @@ public class GardenGroups extends Puzzle {
                        .reduce(Long::sum).orElse(0L);
     }
 
-    private static Stream<Region> findRegions(Set<Vector2> value) {
+    private static Stream<Region> findRegions(Set<Vector2> vectors) {
         Set<Region> regions = new HashSet<>();
-        while (!value.isEmpty()) {
-            Vector2 vector = value.stream().findFirst().orElseThrow();
-            value.remove(vector);
-            Set<Vector2> regionSet = new HashSet<>();
+        while (!vectors.isEmpty()) {
+            Vector2 vector = vectors.stream().findFirst().orElseThrow();
+            vectors.remove(vector);
+            Set<Vector2> regionVectors = new HashSet<>();
             Set<Vector2> adjacent = Set.of(vector);
             while (!adjacent.isEmpty()) {
-                regionSet.addAll(adjacent);
+                regionVectors.addAll(adjacent);
                 adjacent = adjacent.stream()
-                                   .flatMap(v -> findAdjacent(v, value))
+                                   .flatMap(v -> findAdjacent(v, vectors))
                                    .collect(Collectors.toSet());
 
             }
             Set<Plot> plots = new HashSet<>();
-            regionSet.forEach(v -> {
+            regionVectors.forEach(v -> {
                 plots.add(new Plot(v, Arrays.stream(Direction.values())
-                                            .filter(d -> !regionSet.contains(v.add(d.vector())))
+                                            .filter(d -> !regionVectors.contains(v.add(d.vector())))
                                             .collect(Collectors.toSet())));
             });
             regions.add(new Region(plots));
@@ -64,11 +62,11 @@ public class GardenGroups extends Puzzle {
         return regions.stream();
     }
 
-    private static Stream<Vector2> findAdjacent(Vector2 vector, Set<Vector2> set) {
+    private static Stream<Vector2> findAdjacent(Vector2 vector, Set<Vector2> vectors) {
         return Arrays.stream(Direction.values())
                        .map(d -> vector.add(d.vector()))
-                       .filter(set::contains)
-                       .peek(set::remove);
+                       .filter(vectors::contains)
+                       .peek(vectors::remove);
     }
 
     @Override
