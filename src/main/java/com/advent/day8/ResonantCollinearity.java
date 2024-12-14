@@ -47,12 +47,12 @@ public class ResonantCollinearity extends Puzzle {
     }
 
     private void getPart1Antinodes(Set<Vector2> antinodes, Vector2 antena1, Vector2 antena2) {
-        var diff = antena1.minus(antena2);
+        var diff = antena1.subtract(antena2);
         var antinode1 = antena1.add(diff);
         if (inBounds(antinode1)) {
             antinodes.add(antinode1);
         }
-        var antinode2 = antena2.minus(diff);
+        var antinode2 = antena2.subtract(diff);
         if (inBounds(antinode2)) {
             antinodes.add(antinode2);
         }
@@ -85,16 +85,16 @@ public class ResonantCollinearity extends Puzzle {
     private void getPart2Antinodes(Set<Vector2> antinodes, Vector2 antena1, Vector2 antena2) {
         antinodes.add(antena1);
         antinodes.add(antena2);
-        var diff = antena1.minus(antena2);
+        var diff = antena1.subtract(antena2);
         var antinode1 = antena1.add(diff);
         while (inBounds(antinode1)) {
             antinodes.add(antinode1);
             antinode1 = antinode1.add(diff);
         }
-        var antinode2 = antena2.minus(diff);
+        var antinode2 = antena2.subtract(diff);
         while (inBounds(antinode2)) {
             antinodes.add(antinode2);
-            antinode2 = antinode2.minus(diff);
+            antinode2 = antinode2.subtract(diff);
         }
     }
 

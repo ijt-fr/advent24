@@ -70,7 +70,7 @@ public class ClawContraption extends Puzzle {
     }
 
     /**
-     * An equation of the form ax + by = c.
+     * An equation of the form aX + bY = c.
      */
     record Equation(long a, long b, long c) {
 

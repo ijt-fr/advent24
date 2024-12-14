@@ -1,5 +1,6 @@
 package com.advent.util;
 
+import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class InputUtils {
                        .toArray(Integer[][]::new);
     }
 
-    public static String toString(char[][] matrix) {
+    public static String toString(Character[][] matrix) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {

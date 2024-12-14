@@ -1,5 +1,7 @@
 package com.advent.util;
 
+import java.util.stream.Stream;
+
 public class Grid<T> {
 
     private final T[][] grid;
