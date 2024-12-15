@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.advent.util.Vector2;
 
-public class Obstacles {
+public final class Obstacles {
 
     private Obstacles() {
         // private constructor

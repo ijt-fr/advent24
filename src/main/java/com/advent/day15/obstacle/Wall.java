@@ -6,7 +6,7 @@ import java.util.Set;
 import com.advent.util.Direction;
 import com.advent.util.Vector2;
 
-public final class Wall extends Obstacle {
+final class Wall extends Obstacle {
 
     Wall(List<Vector2> locations) {
         super(locations);
