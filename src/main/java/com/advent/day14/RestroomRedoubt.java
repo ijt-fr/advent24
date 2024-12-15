@@ -48,7 +48,6 @@ public class RestroomRedoubt extends Puzzle {
                        .collect(Collectors.toSet());
         MAX_X++;
         MAX_Y++;
-
     }
 
     @Override

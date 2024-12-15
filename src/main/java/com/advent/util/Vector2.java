@@ -9,4 +9,8 @@ public record Vector2(int x, int y) {
     public Vector2 subtract(Vector2 vector) {
         return new Vector2(x - vector.x, y - vector.y);
     }
+
+    public Vector2 add(Direction direction) {
+        return new Vector2(x + direction.vector().x, y + direction.vector().y);
+    }
 }
