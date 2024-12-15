@@ -14,10 +14,9 @@ public abstract class AbstractWarehouse {
     public void moveBot(Direction direction) {
         Vector2 destination = robot.add(direction);
         Optional<Obstacle> obstacle = obstacles().stream()
-                                                            .filter(ob -> ob.locations().contains(destination))
-                                                            .findAny();
-        boolean canMove = obstacle.map(value -> value.move(direction, obstacles())).orElse(true);
-        if (canMove) {
+                                              .filter(ob -> ob.locations().contains(destination))
+                                              .findAny();
+        if (obstacle.map(value -> value.move(direction, obstacles())).orElse(true)) {
             robot = destination;
         }
     }

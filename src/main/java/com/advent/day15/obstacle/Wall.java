@@ -1,5 +1,6 @@
 package com.advent.day15.obstacle;
 
+import java.util.List;
 import java.util.Set;
 
 import com.advent.util.Direction;
@@ -7,7 +8,7 @@ import com.advent.util.Vector2;
 
 public final class Wall extends Obstacle {
 
-    Wall(Set<Vector2> locations) {
+    Wall(List<Vector2> locations) {
         super(locations);
     }
 
@@ -17,7 +18,12 @@ public final class Wall extends Obstacle {
     }
 
     @Override
-    public boolean move(Direction direction, Set<Obstacle> obstacles) {
+    protected void doMove(Direction direction, Set<Obstacle> obstacles) {
+        throw new IllegalStateException("Wall cannot move");
+    }
+
+    @Override
+    protected boolean canMove(Direction direction, Set<Obstacle> obstacles) {
         return false;
     }
 }

@@ -1,5 +1,6 @@
 package com.advent.day15.obstacle;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -7,27 +8,15 @@ import com.advent.util.Direction;
 import com.advent.util.Vector2;
 
 public abstract class Obstacle {
-    private final Set<Vector2> locations;
+    private final List<Vector2> locations;
 
-    Obstacle(Set<Vector2> locations) {
+    Obstacle(List<Vector2> locations) {
         this.locations = locations;
     }
 
     public abstract int gps();
 
-    public static Obstacle wall(Vector2 location) {
-        return new Wall(Set.of(location));
-    }
-
-    public static Obstacle box(Vector2 location) {
-        return new Box(Set.of(location));
-    }
-
-    public static Obstacle bigBox(Vector2 location1, Vector2 location2) {
-        return new BigBox(Set.of(location1, location2));
-    }
-
-    public Set<Vector2> locations() {
+    public List<Vector2> locations() {
         return locations;
     }
 
@@ -44,5 +33,15 @@ public abstract class Obstacle {
         return Objects.hash(locations);
     }
 
-    public abstract boolean move(Direction direction, Set<Obstacle> obstacles);
+    public boolean move(Direction direction, Set<Obstacle> obstacles) {
+        boolean canMove = canMove(direction, obstacles);
+        if (canMove) {
+            doMove(direction, obstacles);
+        }
+        return canMove;
+    }
+
+    protected abstract boolean canMove(Direction direction, Set<Obstacle> obstacles);
+
+    protected abstract void doMove(Direction direction, Set<Obstacle> obstacles);
 }

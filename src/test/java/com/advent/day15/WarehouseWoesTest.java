@@ -57,6 +57,6 @@ public class WarehouseWoesTest extends BasePuzzleTest<WarehouseWoes> {
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.empty();
+        return Stream.of(Arguments.of(EXAMPLE_1, 9021));
     }
 }

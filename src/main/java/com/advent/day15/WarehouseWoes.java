@@ -42,7 +42,8 @@ public class WarehouseWoes extends Puzzle {
         }
         return warehouse.obstacles().stream()
                        .map(Obstacle::gps)
-                       .reduce(Integer::sum).orElse(0);
+                       .reduce(Integer::sum)
+                       .orElse(0);
     }
 
     @Override
@@ -57,12 +58,15 @@ public class WarehouseWoes extends Puzzle {
             Direction direction = directions.pop();
             warehouse.moveBot(direction);
         }
-        return null;
+        return warehouse.obstacles().stream()
+                       .map(Obstacle::gps)
+                       .reduce(Integer::sum)
+                       .orElse(0);
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return 1432898;
     }
 
 }
