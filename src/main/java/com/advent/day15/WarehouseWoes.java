@@ -20,9 +20,12 @@ public class WarehouseWoes extends Puzzle {
     public void parseInput(List<String> lines) {
         int split = lines.indexOf("");
         grid = Grid.ofChars(InputUtils.toCharMatrix(lines.subList(0, split)));
-        var directionsInput = String.join("", lines.subList(split + 1, lines.size())).toCharArray();
-        this.directions = new ArrayDeque<>();
-        for (char direction : directionsInput) {
+        directions = parseDirections(String.join("", lines.subList(split + 1, lines.size())));
+    }
+
+    private Deque<Direction> parseDirections(String directionsInput) {
+        Deque<Direction> directions = new ArrayDeque<>();
+        for (char direction : directionsInput.toCharArray()) {
             switch (direction) {
                 case '>' -> directions.push(Direction.EAST);
                 case '<' -> directions.push(Direction.WEST);
@@ -30,7 +33,7 @@ public class WarehouseWoes extends Puzzle {
                 case 'v' -> directions.push(Direction.SOUTH);
             }
         }
-        directions = directions.reversed();
+        return directions.reversed();
     }
 
     @Override

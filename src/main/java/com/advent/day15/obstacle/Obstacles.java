@@ -20,6 +20,6 @@ public class Obstacles {
     }
 
     public static Obstacle bigBox(Vector2 location1, Vector2 location2) {
-        return new BigBox(List.of(location1, location2));
+        return new Box(List.of(location1, location2));
     }
 }
