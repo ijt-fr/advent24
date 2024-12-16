@@ -3,9 +3,11 @@ package com.advent.day16;
 import static com.advent.util.Direction.EAST;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.advent.Puzzle;
@@ -65,18 +67,18 @@ public class ReindeerMaze extends Puzzle {
         Map<ReindeerWithHistory, Long> unvisited = grid.stream()
                             .filter(cell -> '#' != cell.entry() && 'S' != cell.entry())
                             .map(Grid.Cell::vector)
-                            .flatMap(v -> Direction.stream().map(d -> new ReindeerWithHistory(v, d, new HashMap<>())))
+                            .flatMap(v -> Direction.stream().map(d -> new ReindeerWithHistory(v, d, new HashSet<>())))
                             .collect(Collectors.toMap(r -> r, r -> Long.MAX_VALUE));
         Map<ReindeerWithHistory, Long> visited = new HashMap<>();
-        Optional<Map.Entry<ReindeerWithHistory, Long>> currentOptional = Optional.of(Map.entry(new ReindeerWithHistory(start, EAST, new HashMap<>()), 0L));
+        Optional<Map.Entry<ReindeerWithHistory, Long>> currentOptional = Optional.of(Map.entry(new ReindeerWithHistory(start, EAST, new HashSet<>()), 0L));
         while (!unvisited.isEmpty() && currentOptional.isPresent()) {
             ReindeerWithHistory currentReindeer = currentOptional.get().getKey();
             Long currentDistance = currentOptional.get().getValue();
             Direction.stream()
                     .map(direction -> {
-                        Map<Vector2, Direction> history = new HashMap<>(currentReindeer.history());
+                        Set<Vector2> history = new HashSet<>(currentReindeer.history());
                         var newPos = currentReindeer.position().add(direction);
-                        history.put(newPos, direction);
+                        history.add(newPos);
                         return new ReindeerWithHistory(newPos, direction, history);
                     })
                     .forEach(newReindeer -> {
@@ -91,6 +93,11 @@ public class ReindeerMaze extends Puzzle {
                                         unvisited.remove(r);
                                         unvisited.put(newReindeer, newDistance);
                                     }
+                                    if (newDistance == distance) {
+                                        unvisited.remove(r);
+                                        r.history().addAll(newReindeer.history());
+                                        unvisited.put(r, newDistance);
+                                    }
                                 });
                     });
             visited.put(currentReindeer, currentDistance);
@@ -101,14 +108,7 @@ public class ReindeerMaze extends Puzzle {
         }
         var f = visited.entrySet().stream().filter(e -> e.getKey().position().equals(end))
                         .min(Map.Entry.comparingByValue()).orElseThrow();
-        f.getKey().history().forEach((v, d) -> {
-            switch (d) {
-                case NORTH -> grid.put(v, '^');
-                case EAST -> grid.put(v, '>');
-                case SOUTH -> grid.put(v, 'v');
-                case WEST -> grid.put(v, '<');
-            }
-        });
+        f.getKey().history().forEach(v -> grid.put(v, 'O'));
         System.out.println(InputUtils.toString(grid.grid()));
 
         return f.getKey().history().size() + 1;
@@ -123,7 +123,7 @@ public class ReindeerMaze extends Puzzle {
 
     }
 
-    public record ReindeerWithHistory(Vector2 position, Direction facing, Map<Vector2, Direction> history) {
+    public record ReindeerWithHistory(Vector2 position, Direction facing, Set<Vector2> history) {
 
     }
 }

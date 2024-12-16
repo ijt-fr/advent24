@@ -67,7 +67,7 @@ public class ReindeerMazeTest extends BasePuzzleTest<ReindeerMaze> {
 
     @Override
     public Stream<Arguments> part2Samples() {
-        return Stream.of(Arguments.of(EXAMPLE_1, 45L),
-                Arguments.of(EXAMPLE_2, 64L));
+        return Stream.of(Arguments.of(EXAMPLE_1, 45),
+                Arguments.of(EXAMPLE_2, 64));
     }
 }
