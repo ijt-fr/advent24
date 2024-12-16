@@ -55,6 +55,10 @@ public class Grid<T> {
                                              .mapToObj(j -> new Cell<T>(new Vector2(i, j), get(i, j))));
     }
 
+    public void put(Vector2 vector, T c) {
+        grid[vector.y()][vector.x()] = c;
+    }
+
     public record Cell<T>(Vector2 vector, T entry) {
 
     }
