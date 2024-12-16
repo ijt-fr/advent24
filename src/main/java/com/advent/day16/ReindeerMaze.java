@@ -2,11 +2,12 @@ package com.advent.day16;
 
 import static com.advent.util.Direction.EAST;
 
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,29 +32,30 @@ public class ReindeerMaze extends Puzzle {
 
     @Override
     public Object computePart1() {
-        Map<Reindeer, Long> unvisited = grid.stream()
+        Map<Reindeer, Long> distances = grid.stream()
                                                 .filter(cell -> '#' != cell.entry() && 'S' != cell.entry())
                                                 .map(Grid.Cell::vector)
                                                 .flatMap(v -> Direction.stream().map(d -> new Reindeer(v, d)))
                                                 .collect(Collectors.toMap(r -> r, r -> Long.MAX_VALUE));
-        Map<Reindeer, Long> visited = new HashMap<>();
-        Optional<Map.Entry<Reindeer, Long>> currentOptional = Optional.of(Map.entry(new Reindeer(start, EAST), 0L));
-        while (!unvisited.isEmpty() && currentOptional.isPresent()) {
-            Reindeer currentReindeer = currentOptional.get().getKey();
-            Long currentDistance = currentOptional.get().getValue();
+        distances.put(new Reindeer(start, EAST), 0L);
+        Queue<Reindeer> unvisited = new PriorityQueue<>(Comparator.comparing(distances::get));
+        unvisited.offer(new Reindeer(start, EAST));
+        while (!unvisited.isEmpty()) {
+            Reindeer currentReindeer = unvisited.poll();
             Direction.stream()
                     .map(direction -> new Reindeer(currentReindeer.position().add(direction), direction))
                     .forEach(newReindeer -> {
+                        long currentDistance = distances.get(currentReindeer);
                         long newDistance = currentDistance + (currentReindeer.facing() == newReindeer.facing() ? 1L : 1001L);
-                        unvisited.computeIfPresent(newReindeer, (ignored, distance) -> Math.min(distance, newDistance));
+                        if (distances.containsKey(newReindeer) && distances.get(newReindeer) > newDistance) {
+                            distances.put(newReindeer, newDistance);
+                            unvisited.remove(newReindeer);
+                            unvisited.add(newReindeer);
+                        }
                     });
-            visited.put(currentReindeer, currentDistance);
             unvisited.remove(currentReindeer);
-            currentOptional = unvisited.entrySet().stream()
-                              .filter(e -> !e.getValue().equals(Long.MAX_VALUE))
-                              .min(Map.Entry.comparingByValue());
         }
-        return visited.entrySet().stream().filter(e -> e.getKey().position().equals(end))
+        return distances.entrySet().stream().filter(e -> e.getKey().position().equals(end))
                        .min(Map.Entry.comparingByValue()).map(Map.Entry::getValue).orElse(0L);
     }
 
@@ -64,66 +66,54 @@ public class ReindeerMaze extends Puzzle {
 
     @Override
     public Object computePart2() {
-        Map<ReindeerWithHistory, Long> unvisited = grid.stream()
-                            .filter(cell -> '#' != cell.entry() && 'S' != cell.entry())
-                            .map(Grid.Cell::vector)
-                            .flatMap(v -> Direction.stream().map(d -> new ReindeerWithHistory(v, d, new HashSet<>())))
-                            .collect(Collectors.toMap(r -> r, r -> Long.MAX_VALUE));
-        Map<ReindeerWithHistory, Long> visited = new HashMap<>();
-        Optional<Map.Entry<ReindeerWithHistory, Long>> currentOptional = Optional.of(Map.entry(new ReindeerWithHistory(start, EAST, new HashSet<>()), 0L));
-        while (!unvisited.isEmpty() && currentOptional.isPresent()) {
-            ReindeerWithHistory currentReindeer = currentOptional.get().getKey();
-            Long currentDistance = currentOptional.get().getValue();
+        Map<Reindeer, History> distances = grid.stream()
+                                                .filter(cell -> '#' != cell.entry() && 'S' != cell.entry())
+                                                .map(Grid.Cell::vector)
+                                                .flatMap(v -> Direction.stream().map(d -> new Reindeer(v, d)))
+                                                .collect(Collectors.toMap(r -> r, r -> new History(Long.MAX_VALUE, null)));
+        distances.put(new Reindeer(start, EAST), new History(0L, Set.of(start)));
+        Queue<Reindeer> unvisited = new PriorityQueue<>(Comparator.comparing(r -> distances.get(r).distance()));
+        unvisited.offer(new Reindeer(start, EAST));
+        while (!unvisited.isEmpty()) {
+            Reindeer currentReindeer = unvisited.poll();
             Direction.stream()
-                    .map(direction -> {
-                        Set<Vector2> history = new HashSet<>(currentReindeer.history());
-                        var newPos = currentReindeer.position().add(direction);
-                        history.add(newPos);
-                        return new ReindeerWithHistory(newPos, direction, history);
-                    })
+                    .map(direction -> new Reindeer(currentReindeer.position().add(direction), direction))
                     .forEach(newReindeer -> {
-                        long newDistance = currentDistance + (currentReindeer.facing() == newReindeer.facing() ? 1L : 1001L);
-                        unvisited.keySet().stream()
-                                .filter(r -> r.position().equals(newReindeer.position())
-                                                     && r.facing().equals(newReindeer.facing()))
-                                .findAny()
-                                .ifPresent(r -> {
-                                    long distance = unvisited.get(r);
-                                    if (newDistance < distance) {
-                                        unvisited.remove(r);
-                                        unvisited.put(newReindeer, newDistance);
-                                    }
-                                    if (newDistance == distance) {
-                                        unvisited.remove(r);
-                                        r.history().addAll(newReindeer.history());
-                                        unvisited.put(r, newDistance);
-                                    }
-                                });
-                    });
-            visited.put(currentReindeer, currentDistance);
-            unvisited.remove(currentReindeer);
-            currentOptional = unvisited.entrySet().stream()
-                                      .filter(e -> !e.getValue().equals(Long.MAX_VALUE))
-                                      .min(Map.Entry.comparingByValue());
-        }
-        var f = visited.entrySet().stream().filter(e -> e.getKey().position().equals(end))
-                        .min(Map.Entry.comparingByValue()).orElseThrow();
-        f.getKey().history().forEach(v -> grid.put(v, 'O'));
-        System.out.println(InputUtils.toString(grid.grid()));
+                        History hist = distances.get(currentReindeer);
+                        Set<Vector2> newHistory = new HashSet<>(hist.history());
+                        newHistory.add(newReindeer.position());
 
-        return f.getKey().history().size() + 1;
+                        long currentDistance = hist.distance();
+                        long newDistance = currentDistance + (currentReindeer.facing() == newReindeer.facing() ? 1L : 1001L);
+                        if (distances.containsKey(newReindeer)) {
+                            var oldNewReindeer = distances.get(newReindeer);
+                            if (oldNewReindeer.distance() > newDistance) {
+                                distances.put(newReindeer, new History(newDistance, newHistory));
+                                unvisited.remove(newReindeer);
+                                unvisited.add(newReindeer);
+                            } else if (oldNewReindeer.distance() == newDistance) {
+                                newHistory.addAll(oldNewReindeer.history());
+                                distances.put(newReindeer, new History(newDistance, newHistory));
+                            }
+                        }
+                    });
+            unvisited.remove(currentReindeer);
+        }
+        return distances.entrySet().stream().filter(e -> e.getKey().position().equals(end))
+                        .min(Comparator.comparing(e -> e.getValue().distance()))
+                       .orElseThrow().getValue().history().size();
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return 583;
     }
 
     public record Reindeer(Vector2 position, Direction facing) {
 
     }
-
-    public record ReindeerWithHistory(Vector2 position, Direction facing, Set<Vector2> history) {
-
+    
+    public record History(Long distance, Set<Vector2> history) {
+        
     }
 }
