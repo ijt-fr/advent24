@@ -43,7 +43,7 @@ public class SevenBitComputer {
 
     public long next() {
         var currentOutputs = output.size();
-        while (output.size() == currentOutputs) {
+        while (output.size() == currentOutputs && instructionPointer < instructions.length) {
             int opcode = instructions[instructionPointer];
             int operand = instructions[instructionPointer + 1];
             executeInstruction(opcode, operand);

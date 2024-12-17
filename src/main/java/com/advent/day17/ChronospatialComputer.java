@@ -2,9 +2,6 @@ package com.advent.day17;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,26 +37,49 @@ public class ChronospatialComputer extends Puzzle {
     @Override
     public Object computePart2() {
         List<Long> instructionsList = Arrays.stream(instructions).boxed().map(i -> (long) i).toList();
-        a = 35_150_000_000_000L;
+//        a = 35_151_358_933_097L;
+        // 16 digits starts at 35,184,372,088,832 with last digit 2
+        // 70,368,744,177,664 -> last digit 1
+        // 105553116266496 -> last digit 0
+        //
+        long result = 0L; // first 16 result number
 
-        Runnable helloRunnable = () -> System.out.println(a);
-        try (var executor = Executors.newScheduledThreadPool(1)) {
-            executor.scheduleAtFixedRate(helloRunnable, 0, 3, TimeUnit.SECONDS);
-            boolean isMatch = false;
-            while (!isMatch) {
+        long startA = 1;
+        for (int i = instructionsList.size() - 1; i >= 0; i--) {
+            a = startA;
+            long currentDigits = 1L << (3 * i);
+            result += currentDigits;
+            Long something;
+            do {
                 a++;
-                isMatch = true;
-                var computer = new SevenBitComputer(a, b, c, instructions);
-                for (Long instruct : instructionsList) {
-                    long next = computer.next();
-                    if (next != instruct) {
-                        isMatch = false;
-                        break;
-                    }
-                }
-            }
+                result += currentDigits;
+                var resultList = new SevenBitComputer(a, b, c, instructions).run();
+                something = resultList.getFirst();
+            } while (!something.equals(instructionsList.get(i)));
+            startA <<= 3;
         }
-        return a;
+        System.out.println(new SevenBitComputer(result, b, c, instructions).run());
+        return result - 117440L;
+
+//        a = result;
+//        boolean isMatch = false;
+//        while (!isMatch) {
+//            isMatch = true;
+//            var computer = new SevenBitComputer(a, b, c, instructions);
+//            var out = computer.run();
+//            System.out.println(a + ": " + out);
+//            if (!out.equals(instructionsList)) {
+//                isMatch = false;
+//            }
+//            for (Long instruct : instructionsList) {
+//                long next = computer.next();
+//                if (next != instruct) {
+//                    isMatch = false;
+//                    break;
+//                }
+//            }
+//        }
+//        return a;
     }
 
     @Override
