@@ -13,6 +13,7 @@ public class ChronospatialComputer extends Puzzle {
     private long b;
     private long c;
     private int[] instructions;
+    private List<Long> instructionsList;
 
     @Override
     public void parseInput(List<String> lines) {
@@ -21,6 +22,7 @@ public class ChronospatialComputer extends Puzzle {
         c = Long.parseLong(StringUtils.substringAfter(lines.get(2), "Register C: "));
         instructions = Arrays.stream(StringUtils.substringAfter(lines.get(4), "Program: ").split(","))
                 .mapToInt(Integer::parseInt).toArray();
+        instructionsList = Arrays.stream(instructions).boxed().map(i -> (long) i).toList();
     }
 
     @Override
@@ -36,55 +38,24 @@ public class ChronospatialComputer extends Puzzle {
 
     @Override
     public Object computePart2() {
-        List<Long> instructionsList = Arrays.stream(instructions).boxed().map(i -> (long) i).toList();
-//        a = 35_151_358_933_097L;
-        // 16 digits starts at 35,184,372,088,832 with last digit 2
-        // 70,368,744,177,664 -> last digit 1
-        // 105553116266496 -> last digit 0
-        //
-        long result = 0L; // first 16 result number
-
-        long startA = 1;
-        for (int i = instructionsList.size() - 1; i >= 0; i--) {
-            a = startA;
-            long currentDigits = 1L << (3 * i);
-            result += currentDigits;
-            Long something;
-            do {
-                a++;
-                result += currentDigits;
-                var resultList = new SevenBitComputer(a, b, c, instructions).run();
-                something = resultList.getFirst();
-            } while (!something.equals(instructionsList.get(i)));
-            startA <<= 3;
+        int index = instructionsList.size() - 1;
+        long multiplier = 1L << (3 * (index));
+        a = multiplier;
+        while (index >= 0) {
+            var out = new SevenBitComputer(a, b, c, instructions).run();
+            if (out.subList(index, out.size()).equals(instructionsList.subList(index, instructionsList.size()))) {
+                index--;
+                multiplier = 1L << (3 * (index));
+            } else {
+                a += multiplier;
+            }
         }
-        System.out.println(new SevenBitComputer(result, b, c, instructions).run());
-        return result - 117440L;
-
-//        a = result;
-//        boolean isMatch = false;
-//        while (!isMatch) {
-//            isMatch = true;
-//            var computer = new SevenBitComputer(a, b, c, instructions);
-//            var out = computer.run();
-//            System.out.println(a + ": " + out);
-//            if (!out.equals(instructionsList)) {
-//                isMatch = false;
-//            }
-//            for (Long instruct : instructionsList) {
-//                long next = computer.next();
-//                if (next != instruct) {
-//                    isMatch = false;
-//                    break;
-//                }
-//            }
-//        }
-//        return a;
+        return a;
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return 107416870455451L;
     }
 
 }
