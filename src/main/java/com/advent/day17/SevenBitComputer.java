@@ -4,17 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import com.advent.day17.memoization.Adv;
-import com.advent.day17.memoization.Bst;
-import com.advent.day17.memoization.Bxc;
-import com.advent.day17.memoization.Bxl;
-
 public class SevenBitComputer {
 
-    private static final Adv ADV = new Adv();
-    private static final Bxl BXL = new Bxl();
-    private static final Bst BST = new Bst();
-    private static final Bxc BXC = new Bxc();
     long a;
     long b;
     long c;
@@ -41,17 +32,6 @@ public class SevenBitComputer {
         return output;
     }
 
-    public long next() {
-        var currentOutputs = output.size();
-        while (output.size() == currentOutputs && instructionPointer < instructions.length) {
-            int opcode = instructions[instructionPointer];
-            int operand = instructions[instructionPointer + 1];
-            executeInstruction(opcode, operand);
-            instructionPointer += 2;
-        }
-        return output.getLast();
-    }
-
     public void executeInstruction(int opcode, int operand) {
         try {
             switch (opcode) {
@@ -71,11 +51,11 @@ public class SevenBitComputer {
     }
 
     private void out(int operand) throws ExecutionException {
-        output.add(BST.get(combo(operand)));
+        output.add(combo(operand) & 7);
     }
 
     private void bxc(long ignored) throws ExecutionException {
-        b = BXC.get(b, c);
+        b = b ^ c;
     }
 
     private void jnz(int operand) {
@@ -85,23 +65,23 @@ public class SevenBitComputer {
     }
 
     private void bst(int operand) throws ExecutionException {
-        b = BST.get(combo(operand));
+        b = combo(operand) & 7;
     }
 
     private void bxl(int operand) throws ExecutionException {
-        b = BXL.get(b, operand);
+        b = b ^ operand;
     }
 
     private void adv(int operand) throws ExecutionException {
-        a = ADV.get(a, combo(operand));
+        a = a >> combo(operand);
     }
 
     private void bdv(int operand) throws ExecutionException {
-        b = ADV.get(a, combo(operand));
+        b = a >> combo(operand);
     }
 
     private void cdv(int operand) throws ExecutionException {
-        c = ADV.get(a, combo(operand));
+        c = a >> combo(operand);
     }
 
     private Long combo(int operand) {
@@ -112,18 +92,5 @@ public class SevenBitComputer {
             case 6 -> c;
             default -> throw new IllegalArgumentException("Invalid combo operand: " + operand);
         };
-    }
-
-    public record Combo(long val) {
-
-        public Combo(int operand, long a, long b, long c) {
-            this(switch (operand) {
-                case 0, 1, 3 -> operand;
-                case 4 -> a;
-                case 5 -> b;
-                case 6 -> c;
-                default -> throw new IllegalArgumentException("Invalid combo operand: " + operand);
-            });
-        }
     }
 }
