@@ -13,4 +13,9 @@ public record Vector2(int x, int y) {
     public Vector2 add(Direction direction) {
         return new Vector2(x + direction.vector().x, y + direction.vector().y);
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%d, %d)", x, y);
+    }
 }

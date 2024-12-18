@@ -2,12 +2,11 @@ package com.advent.day18;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.advent.Puzzle;
 import com.advent.util.Direction;
@@ -19,23 +18,28 @@ public class RamRun extends Puzzle {
     private static final int MAX_X = 71;
     private static final int MAX_Y = 71;
 
-    private Set<Vector2> corruptParts;
+    private List<Vector2> corruptParts;
 
     @Override
     public void parseInput(List<String> lines) {
         corruptParts = lines.stream().map(s -> s.split(","))
                 .map(a -> new Vector2(Integer.parseInt(a[0]), Integer.parseInt(a[1])))
-                               .toList().subList(0, SIZE).stream().collect(Collectors.toSet());
+                               .toList();
 
     }
 
     @Override
     public Object computePart1() {
+        HashSet<Vector2> corruptSet = new HashSet<>(corruptParts.subList(0, 1024));
+        return dijkstra(corruptSet);
+    }
+
+    private Long dijkstra(HashSet<Vector2> corruptSet) {
         Map<Vector2, Long> distances = new HashMap<>();
         for (int x = 0; x < MAX_X; x++) {
             for (int y = 0; y < MAX_Y; y++) {
                 Vector2 v = new Vector2(x, y);
-                if (!corruptParts.contains(v)) {
+                if (!corruptSet.contains(v)) {
                     distances.put(v, Long.MAX_VALUE);
                 }
             }
@@ -63,11 +67,18 @@ public class RamRun extends Puzzle {
 
     @Override
     public Object part1Answer() {
-        return null;
+        return 286L;
     }
 
     @Override
     public Object computePart2() {
+        for (int i = 1024; i < corruptParts.size(); i++) {
+            HashSet<Vector2> corruptSet = new HashSet<>(corruptParts.subList(0, i));
+            Long result = dijkstra(corruptSet);
+            if (result == null || result.equals(Long.MAX_VALUE)) {
+                return corruptParts.get(i - 1);
+            }
+        }
         return null;
     }
 
