@@ -55,7 +55,7 @@ public class ChronospatialComputer extends Puzzle {
 
     @Override
     public Object part2Answer() {
-        return 107416870455451L;
+        return 107_416_870_455_451L;
     }
 
 }
