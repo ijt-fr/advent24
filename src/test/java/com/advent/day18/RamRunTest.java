@@ -9,8 +9,6 @@ import com.advent.BasePuzzleTest;
 public class RamRunTest extends BasePuzzleTest<RamRun> {
 
     private static final String EXAMPLE = """
-            
-            
             5,4
             4,2
             4,5

@@ -14,6 +14,10 @@ public record Vector2(int x, int y) {
         return new Vector2(x + direction.vector().x, y + direction.vector().y);
     }
 
+    public int distance(Vector2 other) {
+        return Math.abs(x - other.x) + Math.abs(y - other.y);
+    }
+
     @Override
     public String toString() {
         return String.format("(%d, %d)", x, y);
