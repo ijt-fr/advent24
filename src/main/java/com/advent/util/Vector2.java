@@ -2,6 +2,8 @@ package com.advent.util;
 
 public record Vector2(int x, int y) {
 
+    public static final Vector2 ZERO = new Vector2(0, 0);
+
     public Vector2 add(Vector2 vector) {
         return new Vector2(x + vector.x, y + vector.y);
     }
