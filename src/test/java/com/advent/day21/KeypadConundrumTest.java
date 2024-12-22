@@ -1,15 +1,12 @@
 package com.advent.day21;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 
 import com.advent.BasePuzzleTest;
 
-public class KeypadConundrumTest extends BasePuzzleTest<KeypadConundrum2> {
+public class KeypadConundrumTest extends BasePuzzleTest<KeypadConundrum> {
 
     private static final String EXAMPLE = """
             029A
@@ -20,41 +17,8 @@ public class KeypadConundrumTest extends BasePuzzleTest<KeypadConundrum2> {
             """;
 
     @Override
-    public KeypadConundrum2 getPuzzle() {
-        return new KeypadConundrum2();
-    }
-
-    @Test
-    void test0() {
-        // A -> 0
-        //     <A
-        // v<<A ^>>A
-        assertThat(getPuzzle().goToNumber('A', '0')).isEqualTo(8L);
-    }
-
-
-    @Test
-    void test1() {
-        // A -> 1
-        //     ^<<A
-        // <A v<A A >>^A
-        assertThat(getPuzzle().goToNumber('A', '1')).isEqualTo(10L);
-    }
-
-    @Test
-    void test7() {
-        // A => 7
-        //  ^^^<<A
-        // <AAAv<AA>>^A
-        assertThat(getPuzzle().goToNumber('A', '7')).isEqualTo(12L);
-    }
-
-    @Test
-    void test029A() {
-        var puzzle = getPuzzle();
-        var total = puzzle.goToNumber('A', '0') + puzzle.goToNumber('0', '2')
-                + puzzle.goToNumber('2', '9') + puzzle.goToNumber('9', 'A');
-        assertThat(total).isEqualTo(28L);
+    public KeypadConundrum getPuzzle() {
+        return new KeypadConundrum();
     }
 
     @Override
