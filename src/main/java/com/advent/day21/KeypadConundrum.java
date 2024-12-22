@@ -6,18 +6,33 @@ import static com.advent.day21.KeypadConundrum.DirectionalButton.A;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 import com.advent.Puzzle;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class KeypadConundrum extends Puzzle {
     private Map<Long, char[]> codes;
+    private final LoadingCache<Location, Map<Location, Long>> dijkstraCache;
+
+    KeypadConundrum() {
+        dijkstraCache = CacheBuilder.newBuilder()
+                                .build(new CacheLoader<>() {
+                                    @Override
+                                    public Map<Location, Long> load(Location key) {
+                                        return dijkstra(key);
+                                    }
+                                });
+    }
 
     @Override
     public void parseInput(List<String> lines) {
@@ -25,31 +40,15 @@ public class KeypadConundrum extends Puzzle {
                              .collect(Collectors.toMap(
                                      s -> Long.parseLong(s.substring(0, s.length() - 1)),
                                      String::toCharArray));
-
-
     }
 
     @Override
     public Object computePart1() {
-        Stream<List<DirectionalButton>> streams = Arrays.stream(DirectionalButton.values()).map(List::of);
-        for (int i = 0; i < 2; i++) {
-            streams = streams.flatMap(list -> Arrays.stream(
-                    DirectionalButton.values()).map(b -> {
-                        var newlist = new ArrayList<>(list);
-                        newlist.add(b);
-                        return newlist;
-                }));
-        }
-        Set<List<DirectionalButton>> directions = streams.collect(Collectors.toSet());
-        Set<Location> locations = Arrays.stream(NumberButton.values())
-                                          .flatMap(n -> directions.stream().map(d -> new Location(n, d)))
-                                          .collect(Collectors.toSet());
-
         return codes.entrySet().stream().map(e -> {
             var value = e.getValue();
-            long amount = goToNumber(locations, 'A', value[0]);
+            long amount = goToNumber(3, 'A', value[0]);
             for (int i = 0; i < value.length - 1; i++) {
-                amount += goToNumber(locations, value[i], value[i + 1]);
+                amount += goToNumber(3, value[i], value[i + 1]);
             }
             return e.getKey() * amount;
         }).reduce(Long::sum).orElse(0L);
@@ -67,30 +66,40 @@ public class KeypadConundrum extends Puzzle {
 
     @Override
     public Object part2Answer() {
-        return null;
+        return codes.entrySet().stream().map(e -> {
+            var value = e.getValue();
+            long amount = goToNumber(25, 'A', value[0]);
+            for (int i = 0; i < value.length - 1; i++) {
+                amount += goToNumber(25, value[i], value[i + 1]);
+            }
+            return e.getKey() * amount;
+        }).reduce(Long::sum).orElse(0L);
     }
 
-    public long goToNumber(Set<Location> locations, char from, char to) {
+    public long goToNumber(int length, char from, char to) {
         var fromButton = NumberButton.value(from);
         var toButton = NumberButton.value(to);
         List<DirectionalButton> aButtons = new ArrayList<>();
-        for (DirectionalButton b : locations.stream().findAny().orElseThrow().buttons()) {
+        IntStream.range(0, length).forEach(i -> {
             aButtons.add(A);
-        }
+        });
         Location startLocation = new Location(fromButton, aButtons);
 
         Location endButtons = new Location(toButton, aButtons);
 
-        var distances = dijkstra(locations, startLocation);
+        Map<Location, Long> distances = null;
+        try {
+            distances = dijkstraCache.get(startLocation);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         return distances.get(endButtons);
     }
 
-    public static Map<Location, Long> dijkstra(Set<Location> vectors, Location start) {
-        Map<Location, Long> distances = vectors.stream()
-                                                   .collect(Collectors.toMap(v -> v,
-                                                           v ->Long.MAX_VALUE));
+    public static Map<Location, Long> dijkstra(Location start) {
+        Map<Location, Long> distances = new HashMap<>();
         distances.put(start, 0L);
-        Queue<Location> unvisited = new PriorityQueue<>(Comparator.comparing(distances::get));
+        Queue<Location> unvisited = new PriorityQueue<>(Comparator.comparing(l -> distances.getOrDefault(l, Long.MAX_VALUE)));
         unvisited.offer(start);
         while (!unvisited.isEmpty()) {
             Location current = unvisited.poll();
@@ -98,8 +107,7 @@ public class KeypadConundrum extends Puzzle {
                     .forEach(button -> {
                         long newDistance = distances.get(current) + 1;
                         Location newLocation = current.press(button);
-                        if (newLocation != null && distances.containsKey(newLocation) &&
-                                    distances.get(newLocation) > newDistance) {
+                        if (newLocation != null && distances.getOrDefault(newLocation, Long.MAX_VALUE) > newDistance) {
                             distances.put(newLocation, newDistance);
                             unvisited.remove(newLocation);
                             unvisited.add(newLocation);
@@ -153,10 +161,6 @@ public class KeypadConundrum extends Puzzle {
                 };
             }
         }
-    }
-
-    public record History(Long distance, List<Location> locations) {
-
     }
 
     public enum DirectionalButton {
