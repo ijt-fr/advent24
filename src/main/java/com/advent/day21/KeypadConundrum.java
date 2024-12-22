@@ -1,14 +1,18 @@
 package com.advent.day21;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.advent.Puzzle;
 import com.advent.util.Direction;
 import com.advent.util.Grid;
 import com.advent.util.Vector2;
+import com.google.common.collect.Streams;
 
 public class KeypadConundrum extends Puzzle {
     private Map<Long, char[]> codes;
@@ -23,14 +27,7 @@ public class KeypadConundrum extends Puzzle {
 
     @Override
     public Object computePart1() {
-//        return new String(DirectionalKeypad.newKeypad().shortestRoute(DirectionalKeypad.newKeypad().shortestRoute(NumericalKeypad.newKeypad().shortestRoute("029A".toCharArray()))));
-        return codes.entrySet().stream().map(e -> {
-            var value = DirectionalKeypad.newKeypad()
-                                .route(DirectionalKeypad.newKeypad()
-                                               .route(NumericalKeypad.newKeypad()
-                                                              .route(e.getValue())));
-            return e.getKey() * value.length;
-        }).reduce(Long::sum).orElse(0L);
+        return 1L;
     }
 
     @Override
@@ -71,25 +68,6 @@ public class KeypadConundrum extends Puzzle {
         }
     }
 
-    static class DirectionalKeypad extends Keypad {
-        public static final Grid<Character> GRID = Grid.ofChars(new Character[][] {
-                {'.', '^', 'A'},
-                {'<', 'v', '>'}
-        });
-
-        private DirectionalKeypad(Vector2 current) {
-            super(current);
-        }
-
-        @Override
-        Grid<Character> grid() {
-            return GRID;
-        }
-
-        public static DirectionalKeypad newKeypad() {
-            return new DirectionalKeypad(new Vector2(2, 0));
-        }
-    }
 
     abstract static class Keypad {
 
@@ -101,100 +79,84 @@ public class KeypadConundrum extends Puzzle {
 
         abstract Grid<Character> grid();
 
-        public char[] route(char[] chars) {
-            StringBuilder builder = new StringBuilder();
-            for (char ch : chars) {
-                Vector2 v = grid().stream()
-                                    .filter(cell -> cell.entry() == ch)
-                                    .map(Grid.Cell::vector)
-                                    .findAny().orElseThrow();
-                List<Button> moves = getMoves(v);
-                move(builder, Button.A, moves);
-                builder.append("A");
+        public Set<String> getAllRoutes(Set<String> charsSet) {
+            List<Vector2> vectors = new ArrayList<>();
+            vectors.add(current);
+            Set<String> result = new HashSet<>();
+            for (String chars : charsSet) {
+                for (char ch : chars.toCharArray()) {
+                    vectors.add(grid().stream()
+                                        .filter(cell -> cell.entry() == ch)
+                                        .map(Grid.Cell::vector)
+                                        .findAny().orElseThrow());
+                }
+                result.addAll(go(vectors));
             }
-            return builder.toString().toCharArray();
+            return result;
         }
 
-        private List<Button> getMoves(Vector2 v) {
-            var diff = v.subtract(current);
-            List<Button> moves = new ArrayList<>();
-            while (!diff.equals(Vector2.ZERO)) {
-                if (diff.x() > 0) {
-                    var newCurrent = current.add(Direction.EAST);
-                    if (grid().get(newCurrent) != '.') {
-                        moves.add(Button.RIGHT);
-                        current = newCurrent;
-                    }
-                } else if (diff.x() < 0) {
-                    var newCurrent = current.add(Direction.WEST);
-                    if (grid().get(newCurrent) != '.') {
-                        moves.add(Button.LEFT);
-                        current = newCurrent;
-                    }
-                }
-                if (diff.y() > 0) {
-                    var newCurrent = current.add(Direction.SOUTH);
-                    if (grid().get(newCurrent) != '.') {
-                        moves.add(Button.DOWN);
-                        current = newCurrent;
-                    }
-                } else if (diff.y() < 0) {
-                    var newCurrent = current.add(Direction.NORTH);
-                    if (grid().get(newCurrent) != '.') {
-                        moves.add(Button.UP);
-                        current = newCurrent;
-                    }
-                }
-
-                diff = v.subtract(current);
+        private Set<String> go(List<Vector2> vectors) {
+            Vector2 current = vectors.get(0);
+            Vector2 next = vectors.get(1);
+            if (vectors.size() == 2) {
+                Set<String> list = new HashSet<>(moveX(next, current, Set.of("")));
+                list.addAll(moveY(next, current, Set.of("")));
+                return list;
             }
-            return moves;
+            var nextVectors = new ArrayList<>(vectors.subList(1, vectors.size()));
+            Set<String> list = new HashSet<>(moveX(next, current, go(nextVectors)));
+            list.addAll(moveY(next, current, go(nextVectors)));
+            return list;
         }
 
-        private void move(StringBuilder builder, Button previous, List<Button> remaining) {
-            var it = previous.preferences().iterator();
-            while (it.hasNext()) {
-                Button nextPreference = Button.of(it.next());
-                if (remaining.contains(nextPreference)) {
-                    builder.append(nextPreference.value());
-                    remaining.remove(nextPreference);
-                    move(builder, nextPreference, remaining);
+        private Set<String> moveY(Vector2 next, Vector2 current, Set<String> chars) {
+            var diff = next.subtract(current);
+            if (diff.x() == 0 && diff.y() == 0) {
+                return chars.stream().map(ch -> ch + "A").collect(Collectors.toSet());
+            }
+            if (diff.y() > 0) {
+                var newCurrent = current.add(Direction.SOUTH);
+                if (grid().get(newCurrent) != '.') {
+                    var newChars = chars.stream().map(ch -> "v" + ch).collect(Collectors.toSet());
+                    var list = new HashSet<>(moveY(next, newCurrent, newChars));
+                    list.addAll(moveX(next, newCurrent, newChars));
+                    return list;
+                }
+            } else if (diff.y() < 0) {
+                var newCurrent = current.add(Direction.NORTH);
+                if (grid().get(newCurrent) != '.') {
+                    var newChars =  chars.stream().map(ch -> "^" + ch).collect(Collectors.toSet());
+                    var list = new HashSet<>(moveY(next, newCurrent, newChars));
+                    list.addAll(moveX(next, newCurrent, newChars));
+                    return list;
                 }
             }
-        }
-    }
-
-    enum Button {
-        A('A', List.of('^', '>', 'v', '<')),
-        UP('^', List.of('^', 'v', '<', '>')),
-        DOWN('v', List.of('v', '<', '^', '>')),
-        LEFT('<', List.of('<', 'v', '^', '>')),
-        RIGHT('>', List.of('>', 'v', '^', '<'));
-
-        private final List<Character> preferences;
-        private final char value;
-
-        Button(char value, List<Character> preferences) {
-            this.value = value;
-            this.preferences = preferences;
+            return Set.of();
         }
 
-        public static Button of(Character next) {
-            return switch (next) {
-                case '^' -> UP;
-                case 'v' -> DOWN;
-                case '<' -> LEFT;
-                case '>' -> RIGHT;
-                default -> throw new IllegalArgumentException();
-            };
-        }
-
-        public List<Character> preferences() {
-            return preferences;
-        }
-
-        public char value() {
-            return value;
+        private Set<String> moveX(Vector2 next, Vector2 current, Set<String> chars) {
+            var diff = next.subtract(current);
+            if (diff.x() == 0 && diff.y() == 0) {
+                return chars.stream().map(ch -> "A" + ch).collect(Collectors.toSet());
+            }
+            if (diff.x() > 0) {
+                var newCurrent = current.add(Direction.EAST);
+                if (grid().get(newCurrent) != '.') {
+                    var newChars = chars.stream().map(ch ->">" + ch).collect(Collectors.toSet());
+                    var list = new HashSet<>(moveY(next, newCurrent, newChars));
+                    list.addAll(moveX(next, newCurrent, newChars));
+                    return list;
+                }
+            } else if (diff.x() < 0) {
+                var newCurrent = current.add(Direction.WEST);
+                if (grid().get(newCurrent) != '.') {
+                    var newChars = chars.stream().map(ch -> "<" + ch).collect(Collectors.toSet());
+                    var list = new HashSet<>(moveY(next, newCurrent, newChars));
+                    list.addAll(moveX(next, newCurrent, newChars));
+                    return list;
+                }
+            }
+            return Set.of();
         }
     }
 }

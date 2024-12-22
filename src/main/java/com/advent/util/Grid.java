@@ -1,5 +1,6 @@
 package com.advent.util;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -57,6 +58,10 @@ public class Grid<T> {
 
     public void put(Vector2 vector, T c) {
         grid[vector.y()][vector.x()] = c;
+    }
+
+    public Optional<Vector2> anyVectorOf(T t) {
+        return stream().filter(c -> c.entry().equals(t)).map(Cell::vector).findAny();
     }
 
     public record Cell<T>(Vector2 vector, T entry) {
