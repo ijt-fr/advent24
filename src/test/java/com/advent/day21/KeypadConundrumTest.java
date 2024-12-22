@@ -49,6 +49,14 @@ public class KeypadConundrumTest extends BasePuzzleTest<KeypadConundrum2> {
         assertThat(getPuzzle().goToNumber('A', '7')).isEqualTo(12L);
     }
 
+    @Test
+    void test029A() {
+        var puzzle = getPuzzle();
+        var total = puzzle.goToNumber('A', '0') + puzzle.goToNumber('0', '2')
+                + puzzle.goToNumber('2', '9') + puzzle.goToNumber('9', 'A');
+        assertThat(total).isEqualTo(28L);
+    }
+
     @Override
     public Stream<Arguments> part1Samples() {
         return Stream.of(Arguments.of(EXAMPLE, 126384L));
