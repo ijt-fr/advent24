@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,17 +23,14 @@ import com.google.common.cache.LoadingCache;
 
 public class KeypadConundrum extends Puzzle {
     private Map<Long, char[]> codes;
-    private final LoadingCache<Key, Long> dijkstraCache;
+    private static final LoadingCache<Key, Long> dijkstraCache = CacheBuilder.newBuilder()
+                                                                         .build(new CacheLoader<>() {
+                                                                             @Override
+                                                                             public Long load(Key key) {
+                                                                                 return compute(key.from(), key.to(), key.depth());
+                                                                             }
+                                                                         });
 
-    KeypadConundrum() {
-        dijkstraCache = CacheBuilder.newBuilder()
-                                .build(new CacheLoader<>() {
-                                    @Override
-                                    public Long load(Key key) {
-                                        return compute(key.from(), key.to(), key.depth());
-                                    }
-                                });
-    }
 
     @Override
     public void parseInput(List<String> lines) {
@@ -83,43 +81,50 @@ public class KeypadConundrum extends Puzzle {
     public long goToNumber(int length, char from, char to) {
         var fromButton = NumberButton.value(from);
         var toButton = NumberButton.value(to);
-        List<DirectionalButton> aButtons = new ArrayList<>();
-        IntStream.range(0, length).forEach(i -> {
-            aButtons.add(A);
-        });
-        Location startLocation = new Location(fromButton, aButtons);
-        Location endLocation = new Location(toButton, aButtons);
-
-        Map<Location, Long> distances = dijkstra(startLocation, endLocation);
-        return distances.get(endLocation);
+        return 0L;
+//        try {
+//            return dijkstraCache.get(new Key(fromButton, toButton, length));
+//        } catch (ExecutionException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
-    private Long compute(DirectionalButton from, DirectionalButton to, int depth) {
+    public static Long compute(DirectionalButton from, DirectionalButton to, int depth) {
         List<DirectionalButton> fromList = new ArrayList<>();
         fromList.add(from);
         IntStream.range(0, depth - 1).forEach(ignored -> fromList.add(A));
         List<DirectionalButton> toList = new ArrayList<>();
         toList.add(to);
         IntStream.range(0, depth - 1).forEach(ignored -> toList.add(A));
-        return miniDijkstra(new Buttons(fromList), new Buttons(toList));
+        return miniDijkstra(from, to, depth);
     }
 
-    private static Long miniDijkstra(Buttons start, Buttons end) {
-        Map<Buttons, Long> distances = new HashMap<>();
+    private static Long miniDijkstra(DirectionalButton start, DirectionalButton end, int depth) {
+        Map<DirectionalButton, Long> distances = new HashMap<>();
         distances.put(start, 0L);
-        Queue<Buttons> unvisited = new PriorityQueue<>(Comparator.comparing(l -> distances.getOrDefault(l, Long.MAX_VALUE)));
+        Queue<DirectionalButton> unvisited = new PriorityQueue<>(Comparator.comparing(l -> distances.getOrDefault(l, Long.MAX_VALUE)));
         unvisited.offer(start);
         while (!unvisited.isEmpty()) {
-            Buttons current = unvisited.poll();
+            DirectionalButton current = unvisited.poll();
             Arrays.stream(DirectionalButton.values())
                     .forEach(button -> {
-                        long newDistance = distances.get(current) + 1;
-                        Buttons newLocation = current.press(button);
-                        if (newLocation != null && distances.getOrDefault(newLocation, Long.MAX_VALUE) > newDistance) {
-                            distances.put(newLocation, newDistance);
-                            unvisited.remove(newLocation);
-                            unvisited.add(newLocation);
-                            if (newLocation.equals(end)) {
+                        DirectionalButton newButton = current.press(button);
+                        long newDistance = distances.get(current);
+                        if (depth > 1) {
+                            try {
+                                newDistance += dijkstraCache.get(new Key(current, newButton, depth - 1));
+                            } catch (ExecutionException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            newDistance += 1;
+                        }
+
+                        if (newButton != null && distances.getOrDefault(newButton, Long.MAX_VALUE) > newDistance) {
+                            distances.put(newButton, newDistance);
+                            unvisited.remove(newButton);
+                            unvisited.add(newButton);
+                            if (newButton.equals(end)) {
                                 unvisited.clear();
                             }
                         }
@@ -129,7 +134,7 @@ public class KeypadConundrum extends Puzzle {
         return distances.getOrDefault(end, Long.MAX_VALUE);
     }
 
-    public static Map<Location, Long> dijkstra(Location start, Location end) {
+    public static Long dijkstra(Location start, Location end) {
         Map<Location, Long> distances = new HashMap<>();
         distances.put(start, 0L);
         Queue<Location> unvisited = new PriorityQueue<>(Comparator.comparing(l -> distances.getOrDefault(l, Long.MAX_VALUE)));
@@ -152,7 +157,7 @@ public class KeypadConundrum extends Puzzle {
                     });
             unvisited.remove(current);
         }
-        return distances;
+        return distances.getOrDefault(end, Long.MAX_VALUE);
     }
 
     public record Location(NumberButton number, List<DirectionalButton> buttons) {
