@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,14 +22,14 @@ import com.google.common.cache.LoadingCache;
 
 public class KeypadConundrum extends Puzzle {
     private Map<Long, char[]> codes;
-    private final LoadingCache<Key, Long> dijkstraCache;
+    private final LoadingCache<Location, Map<Location, Long>> dijkstraCache;
 
     KeypadConundrum() {
         dijkstraCache = CacheBuilder.newBuilder()
                                 .build(new CacheLoader<>() {
                                     @Override
-                                    public Long load(Key key) {
-                                        return compute(key.from(), key.to(), key.depth());
+                                    public Map<Location, Long> load(Location key) {
+                                        return dijkstra(key);
                                     }
                                 });
     }
@@ -44,16 +44,11 @@ public class KeypadConundrum extends Puzzle {
 
     @Override
     public Object computePart1() {
-        int numberOfRobots = 3;
-        return getLength(numberOfRobots);
-    }
-
-    private Object getLength(int numberOfRobots) {
         return codes.entrySet().stream().map(e -> {
             var value = e.getValue();
-            long amount = goToNumber(numberOfRobots, 'A', value[0]);
+            long amount = goToNumber(3, 'A', value[0]);
             for (int i = 0; i < value.length - 1; i++) {
-                amount += goToNumber(numberOfRobots, value[i], value[i + 1]);
+                amount += goToNumber(3, value[i], value[i + 1]);
             }
             return e.getKey() * amount;
         }).reduce(Long::sum).orElse(0L);
@@ -66,18 +61,19 @@ public class KeypadConundrum extends Puzzle {
 
     @Override
     public Object computePart2() {
-        // 4  389816L
-        // 5  960942L
-        // 6  2387042L
-        // 7  5919098L
-
-        int numberOfRobots = 25;
-        return goToNumber(25, 'A', '0');
+        return null;
     }
 
     @Override
     public Object part2Answer() {
-        return null;
+        return codes.entrySet().stream().map(e -> {
+            var value = e.getValue();
+            long amount = goToNumber(25, 'A', value[0]);
+            for (int i = 0; i < value.length - 1; i++) {
+                amount += goToNumber(25, value[i], value[i + 1]);
+            }
+            return e.getKey() * amount;
+        }).reduce(Long::sum).orElse(0L);
     }
 
     public long goToNumber(int length, char from, char to) {
@@ -88,54 +84,24 @@ public class KeypadConundrum extends Puzzle {
             aButtons.add(A);
         });
         Location startLocation = new Location(fromButton, aButtons);
-        Location endLocation = new Location(toButton, aButtons);
 
-        Map<Location, Long> distances = dijkstra(startLocation, endLocation);
-        return distances.get(endLocation);
-    }
+        Location endButtons = new Location(toButton, aButtons);
 
-    private Long compute(DirectionalButton from, DirectionalButton to, int depth) {
-        List<DirectionalButton> fromList = new ArrayList<>();
-        fromList.add(from);
-        IntStream.range(0, depth - 1).forEach(ignored -> fromList.add(A));
-        List<DirectionalButton> toList = new ArrayList<>();
-        toList.add(to);
-        IntStream.range(0, depth - 1).forEach(ignored -> toList.add(A));
-        return miniDijkstra(new Buttons(fromList), new Buttons(toList));
-    }
-
-    private static Long miniDijkstra(Buttons start, Buttons end) {
-        Map<Buttons, Long> distances = new HashMap<>();
-        distances.put(start, 0L);
-        Queue<Buttons> unvisited = new PriorityQueue<>(Comparator.comparing(l -> distances.getOrDefault(l, Long.MAX_VALUE)));
-        unvisited.offer(start);
-        while (!unvisited.isEmpty()) {
-            Buttons current = unvisited.poll();
-            Arrays.stream(DirectionalButton.values())
-                    .forEach(button -> {
-                        long newDistance = distances.get(current) + 1;
-                        Buttons newLocation = current.press(button);
-                        if (newLocation != null && distances.getOrDefault(newLocation, Long.MAX_VALUE) > newDistance) {
-                            distances.put(newLocation, newDistance);
-                            unvisited.remove(newLocation);
-                            unvisited.add(newLocation);
-                            if (newLocation.equals(end)) {
-                                unvisited.clear();
-                            }
-                        }
-                    });
-            unvisited.remove(current);
+        Map<Location, Long> distances = null;
+        try {
+            distances = dijkstraCache.get(startLocation);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return distances.getOrDefault(end, Long.MAX_VALUE);
+        return distances.get(endButtons);
     }
 
-    public static Map<Location, Long> dijkstra(Location start, Location end) {
+    public static Map<Location, Long> dijkstra(Location start) {
         Map<Location, Long> distances = new HashMap<>();
         distances.put(start, 0L);
         Queue<Location> unvisited = new PriorityQueue<>(Comparator.comparing(l -> distances.getOrDefault(l, Long.MAX_VALUE)));
         unvisited.offer(start);
-        AtomicBoolean foundEnd = new AtomicBoolean(false);
-        while (!foundEnd.get()) {
+        while (!unvisited.isEmpty()) {
             Location current = unvisited.poll();
             Arrays.stream(DirectionalButton.values())
                     .forEach(button -> {
@@ -145,9 +111,6 @@ public class KeypadConundrum extends Puzzle {
                             distances.put(newLocation, newDistance);
                             unvisited.remove(newLocation);
                             unvisited.add(newLocation);
-                            if (newLocation.equals(end)) {
-                                foundEnd.set(true);
-                            }
                         }
                     });
             unvisited.remove(current);
@@ -186,12 +149,10 @@ public class KeypadConundrum extends Puzzle {
                     }
                 };
             } else {
-                DirectionalButton pressedButton = buttons.get(next);
-                DirectionalButton nextButton = buttons.get(next - 1);
-                return switch (pressedButton) {
+                return switch (buttons.get(next)) {
                     case A -> pressInner(buttons, next - 1);
                     case UP, DOWN, LEFT, RIGHT -> {
-                        var newButton = nextButton.press(pressedButton);
+                        var newButton = buttons.get(next - 1).press(buttons.get(next));
                         if (newButton != null) {
                             buttons.set(next - 1, newButton);
                         }
@@ -345,55 +306,6 @@ public class KeypadConundrum extends Puzzle {
                     case RIGHT -> null;
                 };
             };
-        }
-    }
-
-    private record Key(DirectionalButton from, DirectionalButton to, int depth) {
-    }
-
-    private record Buttons(List<DirectionalButton> buttons) {
-        public Buttons press(DirectionalButton pressed) {
-            var newButtons = new ArrayList<>(buttons);
-            int i = buttons.size() - 1;
-            newButtons.set(i, pressed);
-            return switch (pressed) {
-                case A -> pressNext(newButtons, i - 1);
-                case UP, DOWN, LEFT, RIGHT -> {
-                    var newButton = newButtons.get(i - 1).press(pressed);
-                    if (newButton != null) {
-                        newButtons.set(i - 1, newButton);
-                    }
-                    yield new Buttons(newButtons);
-                }
-            };
-        }
-
-        private Buttons pressNext(List<DirectionalButton> buttons, int next) {
-            if (next == 1) {
-                return switch (buttons.get(next)) {
-                    case A -> throw new IllegalArgumentException("what happens here?");
-                    case UP, DOWN, LEFT, RIGHT -> {
-                        var newButton = buttons.getFirst().press(buttons.get(next));
-                        if (newButton != null) {
-                            buttons.set(0, newButton);
-                        }
-                        yield new Buttons(buttons);
-                    }
-                };
-            } else {
-                DirectionalButton pressedButton = buttons.get(next);
-                DirectionalButton nextButton = buttons.get(next - 1);
-                return switch (pressedButton) {
-                    case A -> pressNext(buttons, next - 1);
-                    case UP, DOWN, LEFT, RIGHT -> {
-                        var newButton = nextButton.press(pressedButton);
-                        if (newButton != null) {
-                            buttons.set(next - 1, newButton);
-                        }
-                        yield new Buttons(buttons);
-                    }
-                };
-            }
         }
     }
 }
